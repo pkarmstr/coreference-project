@@ -1,8 +1,12 @@
 __author__ = 'keelan'
 
 from os import listdir, path
+import re
 import sys
 import codecs
+
+def is_good(s):
+    return bool(re.search(r".+?_.+?", s))
 
 def sentence_maker(tokens):
     return "<s>" + " ".join(tokens) + "</s>"
@@ -15,24 +19,26 @@ for f in listdir(sys.argv[1]):
     print "extracting tokens from {}".format(f)
     with codecs.open(path.join(sys.argv[1], f), "r") as f_in:
         sentences = []
-        saw_newline_prev = False
+        prev = ""
         sent = []
         for line in f_in:
             line = line.rstrip()
             if line == "":
-                if saw_newline_prev:
-                    sentences.append(sent)
+                if sent != []:
+                    tokens = zip(*[pair.split("_") for pair in sent])[0]
+                    sentences.append(tokens)
                     sent = []
-                    continue
-                else:
-                    saw_newline_prev = True
-                    continue
-            else:
-                saw_newline_prev = False
+                prev = ""
+                continue
 
             token_and_tag_list = line.split()
-            tokens = zip(*[pair.split("_") for pair in token_and_tag_list])[0]
-            sent.extend(tokens)
+            if prev != "" and sent != [] and (not (is_good(token_and_tag_list[0]) and is_good(sent[-1]))):
+                last = sent.pop()
+                token_and_tag_list[0] = last+token_and_tag_list[0]
+                print repr(last), repr(token_and_tag_list[0])
+
+            sent.extend(token_and_tag_list)
+            prev = line
 
         #clear any leftover sentence
         if sent != []:

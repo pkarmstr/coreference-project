@@ -69,4 +69,7 @@ if __name__ == "__main__":
     if len(sys.argv) != 3:
         sys.exit("Usage: python emergency_parse.py [sentences] [num_processes]")
     sentences = read_in_data(sys.argv[1])
-    batch_parse_multiprocessing(sentences, int(sys.argv[2]))
+    parsed = batch_parse_multiprocessing(sentences, int(sys.argv[2]))
+
+    for tree in parsed:
+        print tree.pprint(margin=1000)
