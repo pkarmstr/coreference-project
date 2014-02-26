@@ -2,7 +2,7 @@ __author__ = 'keelan'
 
 import re
 import sys
-from multiprocessing import Pool, JoinableQueue
+from multiprocessing import Process, JoinableQueue
 from threading import Thread
 from stat_parser import Parser
 
@@ -12,6 +12,8 @@ class SaveResults(Thread):
         Thread.__init__(self)
         self.parsed_queue = parsed_queue
         self.results = []
+        self.daemon = True
+        self.start()
 
     def run(self):
         while True:
@@ -25,18 +27,22 @@ class SaveResults(Thread):
 
 def batch_parse(parser, sentences_queue, parsed_queue):
     while True:
-        sent = sentences_queue.get()
+        i,sent = sentences_queue.get()
         tree = parser.parse(sent)
-        parsed_queue.put(tree)
+        parsed_queue.put((i,tree))
         sentences_queue.task_done()
 
 def batch_parse_multiprocessing(sentences_list, num_processes=1):
-    parsing_process = Pool(process=num_processes)
+
     sentences_queue = JoinableQueue()
     parsed_queue = JoinableQueue()
     parser = Parser()
 
-    parsing_process.apply_async(batch_parse, args=(Parser, sentences_queue, parsed_queue))
+    for _ in range(num_processes):
+        proc = Process(target=batch_parse, args=(parser, sentences_queue, parsed_queue))
+        proc.daemon = True
+        proc.start()
+
     sr = SaveResults(parsed_queue)
 
     for sent in sentences_list:
@@ -45,9 +51,7 @@ def batch_parse_multiprocessing(sentences_list, num_processes=1):
     sentences_queue.join()
     parsed_queue.join()
 
-    results = sr.get_ordered_results()
-    for r in results:
-        print r
+    return sr.get_ordered_results()
 
 def read_in_data(file_path):
     sentences = []
@@ -57,10 +61,12 @@ def read_in_data(file_path):
             line = line.rstrip()
             sentences.append(s_finder.match(line).group(1))
 
-    return sentences
+    return list(enumerate(sentences))
 
 
 
 if __name__ == "__main__":
+    if len(sys.argv) != 3:
+        sys.exit("Usage: python emergency_parse.py [sentences] [num_processes]")
     sentences = read_in_data(sys.argv[1])
-    batch_parse_multiprocessing(sentences, sys.argv[2])
+    batch_parse_multiprocessing(sentences, int(sys.argv[2]))
