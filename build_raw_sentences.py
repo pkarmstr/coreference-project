@@ -14,9 +14,9 @@ def sentence_maker(tokens):
 if len(sys.argv) != 3:
     sys.exit("Usage: python build_raw_sentences.py [pos_tagged directory] [output directory]")
 
-print "looking at files from {}...".format(sys.argv[1])
+print "looking at files from {0}...".format(sys.argv[1])
 for f in listdir(sys.argv[1]):
-    print "extracting tokens from {}".format(f)
+    print "extracting tokens from {0}".format(f)
     with codecs.open(path.join(sys.argv[1], f), "r") as f_in:
         sentences = []
         prev = ""
@@ -50,4 +50,4 @@ for f in listdir(sys.argv[1]):
         with codecs.open(out_dir, "w") as f_out:
             f_out.write("\n".join(sentence_strings))
 
-print "wrote everything to {}\t[DONE]".format(sys.argv[2])
+print "wrote everything to {0}\t[DONE]".format(sys.argv[2])
