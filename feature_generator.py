@@ -27,7 +27,7 @@ class Featurizer:
                 line = line.rstrip().split()
                 if self.no_tag:
                     line.extend("")
-                gold_data.append(GoldFeatures(*line))
+                gold_data.append(FeatureRow(*line))
 
         return gold_data
 
