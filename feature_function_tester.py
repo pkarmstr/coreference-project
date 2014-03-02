@@ -2,6 +2,7 @@ __author__ = 'keelan,julia'
 
 import unittest
 from feature_functions import *
+from feature_functions import __determine_number__, __determine_gender__
 from file_reader import RAW_DICTIONARY, POS_DICTIONARY, TREES_DICTIONARY, PRONOUN_LIST, FeatureRow
 
 class FeatureTest(unittest.TestCase):
@@ -28,11 +29,11 @@ class FeatureTest(unittest.TestCase):
         line1 = "NYT20001111.1247.0093.head.coref 13 5 6 PER they 15 12 13 WEA rifles they rifles no".rstrip().split()
         feats1=FeatureRow(*line1)
         #print determine_number(feats1.article,feats1.sentence,feats1.i_cleaned,feats1.offset_begin,feats1.offset_end)
-        self.assertEqual(determine_number(feats1.article,feats1.sentence,feats1.i_cleaned,
+        self.assertEqual(__determine_number__(feats1.article,feats1.sentence,feats1.i_cleaned,
                                           feats1.offset_begin,feats1.offset_end),"plural")
         line2 = "NYT20001111.1247.0093.head.coref 19 5 7 LOC West_Bank 21 32 33 GPE city West_Bank city no".rstrip().split()
         feats2 = FeatureRow(*line2)
-        self.assertEqual(determine_number(feats2.article,feats2.sentence,feats2.i_cleaned,
+        self.assertEqual(__determine_number__(feats2.article,feats2.sentence,feats2.i_cleaned,
                                           feats2.offset_begin,feats2.offset_end),"singular")
 
     def test_number_agreement(self):
@@ -51,15 +52,15 @@ class FeatureTest(unittest.TestCase):
         self.assertEqual(both_proper_name(feats1).endswith("False"),True)
         self.assertEqual(both_proper_name(feats2).endswith("True"),True)
 
-    def test_determine_gender(self):
+    def test__determine_gender__(self):
         line1 = "NYT20001019.2136.0319.head.coref 8 0 3 PER George_W._Bush 26 8 9 GPE Texas George_W._Bush Texas no".rstrip().split()
         feats1= FeatureRow(*line1)
         line2 = "NYT20001020.2144.0366.head.coref 12 24 25 PER she 13 0 1 ORG Associates she Associates no".rstrip().split()
         feats2 = FeatureRow(*line2)
 
-        self.assertEqual(determine_gender(feats1.article, feats1.sentence, feats1.i_cleaned, feats1.offset_begin,
+        self.assertEqual(__determine_gender__(feats1.article, feats1.sentence, feats1.i_cleaned, feats1.offset_begin,
                                           feats1.offset_end, feats1.entity_type), "male") #George Bush
-        self.assertEqual(determine_gender(feats2.article, feats2.sentence, feats2.i_cleaned, feats2.offset_begin,
+        self.assertEqual(__determine_gender__(feats2.article, feats2.sentence, feats2.i_cleaned, feats2.offset_begin,
                                           feats2.offset_end, feats2.entity_type), "female")
 
     def test_gender_agreement(self):

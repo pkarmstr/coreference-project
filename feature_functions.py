@@ -11,9 +11,9 @@ def dem_np(feats):
 
 def number_agreement(feats):
     "WORKS"
-    i_number = determine_number(feats.article,feats.sentence, feats.token,
+    i_number = __determine_number__(feats.article,feats.sentence, feats.token,
                                 feats.offset_begin,feats.offset_end)
-    j_number= determine_number(feats.article, feats.sentence_ref, feats.token_ref,
+    j_number= __determine_number__(feats.article, feats.sentence_ref, feats.token_ref,
                                feats.offset_begin_ref,feats.offset_end_ref)
     return "number_agreement={}".format(i_number==j_number)
 
@@ -29,7 +29,7 @@ def __get_pos__(fname,sent_num,start_index,end_index):
     pos=word[-1][1]
     return pos
 
-def determine_number(article,sentence,token, start_index, end_index):
+def __determine_number__(article,sentence,token, start_index, end_index):
     """WORKS"""
     pos_tag = __get_pos__(article,sentence,start_index, end_index)
     if pos_tag == "PRP" or pos_tag == "PRP$":
@@ -50,9 +50,9 @@ def both_proper_name(feats):
 
 def gender_agreement(feats):
     """WORKS"""
-    i_gender = determine_gender(feats.article, feats.sentence, feats.i_cleaned,
+    i_gender = __determine_gender__(feats.article, feats.sentence, feats.i_cleaned,
                                 feats.offset_begin, feats.offset_end, feats.entity_type)
-    j_gender=determine_gender(feats.article, feats.sentence_ref, feats.j_cleaned,
+    j_gender=__determine_gender__(feats.article, feats.sentence_ref, feats.j_cleaned,
                               feats.offset_begin_ref,feats.offset_end_ref, feats.entity_type_ref)
     if i_gender == "unknown" or j_gender == "unknown":
         agreement = "unknown"
@@ -60,7 +60,7 @@ def gender_agreement(feats):
         agreement = i_gender == j_gender
     return "gender_agreement={}".format(agreement)
 
-def determine_gender(article, sentence, token, start_index, end_index, entity_type):
+def __determine_gender__(article, sentence, token, start_index, end_index, entity_type):
     """WORKS"""
     pos_tag = __get_pos__(article, sentence, start_index, end_index)
     if entity_type == "PER":
