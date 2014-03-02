@@ -29,136 +29,114 @@ def entity_type_ref(fr):
 # Julia's stuff #
 #################
 
-#####tesing right now just with this named tuple and this coreference pair
-line = "NYT20001017.1908.0279.head.coref 6 31 32 ORG corporations 9 9 10 ORG companies corporations companies yes"
-line = line.rstrip().split()
-feats = FeatureRow(*line)
-
-
-##getting the POS until Keelan's branch is updated with the other dictionaries
-pos_files={}
-for f in os.listdir("pos_sentences"):
-    pos_files[f[:-4]]=[]
-    for line in open(r"pos_sentences/"+f,"r"):
-        if line!="\n":
-            #print line
-            pos_files[f[:-4]].append(line.rstrip())
-
-
-##some feature functions, SOME OF THEM NOT FULLY DONE!
-
 def dem_np(feats):
-    dem_re = re.findall(r"these|this|that|those",feats.token_ref) #only j!
-    return "dem_np={}".format(len(dem_re)>0)
+    """WORKS!"""
+    dem_re = re.findall(r"these|this|that|those",feats.j_cleaned) #yes, only j!
+    return "dem_np={}".format(len(dem_re) > 0)
 
 def number_agreement(feats):
-    i_number = determine_number(feats.article,feats.sentence, feats.token, feats.offset_begin)
-    j_number= determine_number(feats.article, feats.sentence_ref, feats.token_ref, feats.offset_begin_ref)
+    "WORKS"
+    i_number = __determine_number__(feats.article,feats.sentence, feats.token,
+                                feats.offset_begin,feats.offset_end)
+    j_number= __determine_number__(feats.article, feats.sentence_ref, feats.token_ref,
+                               feats.offset_begin_ref,feats.offset_end_ref)
     return "number_agreement={}".format(i_number==j_number)
 
-def determine_number(article,sentence,token_to_check, index_to_check):
-    article = article+".raw"
-    tokens=pos_files[article][int(sentence)].split()
-    pos_tagged_i=tokens[int(index_to_check)]
-    pos_tag = pos_tagged_i[pos_tagged_i.index("_")+1:]
-    if pos_tag== "PRP" or pos_tag == "PRP$":
-        if token_to_check in ["they","them","their"]:
+
+def __get_pos__(fname,sent_num,start_index,end_index):
+    """from Anya, just changed the +.raw part. WORKS"""
+    fname += ".raw"
+    sent_num=int(sent_num)
+    start_index=int(start_index)
+    end_index=int(end_index)
+    sent=POS_DICTIONARY[fname][sent_num]
+    word=sent[start_index:end_index]
+    pos=word[-1][1]
+    return pos
+
+def __determine_number__(article,sentence,token, start_index, end_index):
+    """WORKS"""
+    pos_tag = __get_pos__(article,sentence,start_index, end_index)
+    if pos_tag == "PRP" or pos_tag == "PRP$":
+        if token in ["they","them","their"]:
             return "plural"
-        else:
-            return "singular"
-    else: #have to look the POS of the head of the phrase <<<<<----TO DO, NOT FIXED YET!
-        if "_" not in token_to_check: #only one word, have been only looking at one/the first one..easy cases
-            if pos_tag == "NNS":
-                return "plural"
-            else:
-                return "singular"
-        #else: ##NOT FINISHED!!
-            #find head of entity, look number
-            ##NOT FINISHED!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    elif pos_tag == "NNS":
+        return "plural"
+    return "singular"
+
 
 def both_proper_name(feats):
-    i_NNP = determine_proper_name(feats.article,feats.sentence,feats.offset_begin)
-    j_NNP= determine_proper_name(feats.article, feats.sentence_ref, feats.offset_begin_ref)
-    return "both_proper_name={}".format(i_NNP and i_NNP == j_NNP)
+    """WORKS"""
+    i_pos = __get_pos__(feats.article, feats.sentence, feats.offset_begin, feats.offset_end)
+    j_pos = __get_pos__(feats.article, feats.sentence_ref, feats.offset_begin_ref, feats.offset_end_ref)
+    return "both_proper_name={}".format(i_pos == "NNP" and i_pos == j_pos)
 
-def determine_proper_name(article,sentence,index_to_check):
-    article = article+".raw"
-    tokens=pos_files[article][int(sentence)].split()
-    pos_tagged_i=tokens[int(index_to_check)]
-    pos_tag = pos_tagged_i[pos_tagged_i.index("_")+1:]
-    return pos_tag == "NNP"
-
-
-def semantic_class_agreement(feats):
-    pass #TODO
 
 
 def gender_agreement(feats):
-    i_gender = determine_gender(feats.article,feats.sentence, feats.token, feats.offset_begin, feats.entity_type)
-    j_gender=determine_gender(feats.article, feats.sentence_ref, feats.token_ref, feats.offset_begin_ref, feats.entity_type_ref)
+    """WORKS"""
+    i_gender = __determine_gender__(feats.article, feats.sentence, feats.i_cleaned,
+                                feats.offset_begin, feats.offset_end, feats.entity_type)
+    j_gender=__determine_gender__(feats.article, feats.sentence_ref, feats.j_cleaned,
+                              feats.offset_begin_ref,feats.offset_end_ref, feats.entity_type_ref)
     if i_gender == "unknown" or j_gender == "unknown":
-        agreement="unknown"
+        agreement = "unknown"
     else:
         agreement = i_gender == j_gender
     return "gender_agreement={}".format(agreement)
 
-def determine_gender(article,sentence,token_to_check, index_to_check, entity_type):
-    article = article+".raw"
-    tokens=pos_files[article][int(sentence)].split()
-    pos_tagged_i=tokens[int(index_to_check)]
-    pos_tag = pos_tagged_i[pos_tagged_i.index("_")+1:]
+def __determine_gender__(article, sentence, token, start_index, end_index, entity_type):
+    """WORKS"""
     if entity_type == "PER":
-        if pos_tag== "PRP" or pos_tag == "PRP$":
-            if token_to_check in ["he","his"]:
+        if token in PRONOUN_LIST:
+            if token in ["he","his"]:
                 return "male"
-            elif token_to_check in ["she","her"]:
+            elif token in ["she","her"]:
                 return "female"
-            else:
-                return "unknown"
-        elif token_to_check.startswith("Mr."):
+        elif token.startswith("Mr.") or token.split("_")[0] in names.words("male.txt"):
             return "male"
-        elif token_to_check.startswith("Mrs."):
+        elif token.startswith("Mrs.") or token.split("_")[0] in names.words("female.txt"):
             return "female"
-        elif token_to_check in names("male.txt"):
-            return "male"
-        elif token_to_check in names("female.txt"):
-            return "female"
-    else: #organization, locations...
-        return "unknown"
-        #THIS IS INCOMPLETE, FOR ENTITY-TYPES THAT ARE NOT PERSON YOU CHECK
-        #SEMANTIC CLASSES BUT I HAVEN'T DONE SEMANTIC CLASSES YET (TOMORROW)
+    return "unknown"
 
 
 def alias(feats):
-    i_tokens = feats.token.split("_")
-    j_tokens = feats.token_ref.split("_")
+    """WORKS"""
+    i_tokens = feats.i_cleaned.split("_")
+    j_tokens = feats.j_cleaned.split("_")
     if feats.entity_type == "PER" and feats.entity_type_ref == "PER":
-        alias = i_tokens(len(i_tokens)-1) == j_tokens(len(j_tokens)-1) #Murray_Schwartz, Schwartz.
-    elif feats.entity_type == "ORG":
+        alias = i_tokens[len(i_tokens)-1] == j_tokens[len(j_tokens)-1] #Murray_Schwartz, Schwartz.
+    elif feats.entity_type == "ORG" and feats.entity_type_ref == "ORG":
         postmodifiers = ["Corp.", "Ltd."]
-        if len(i_tokens)>len(j_tokens):
+        if len(i_tokens) > len(j_tokens):
             longest = i_tokens
             shortest = j_tokens
-        elif len(j_tokens)>len(i_tokens):
+        elif len(j_tokens) > len(i_tokens):
             longest = j_tokens
-            shortest=i_tokens
+            shortest = i_tokens
         else:
-            longest=None
+            longest = None
             alias = False
-        if longest!=None:
+        if longest != None:
             for m in postmodifiers:
                 if m in longest:
                     longest.remove(m)
             acro_no_period = "".join([w[0] for w in longest if w.istitle()])
             acro_period = "".join([w[0]+"." for w in longest if w.istitle()])
-            alias =  shortest==acro_no_period or shortest == acro_period
+            match_bool = shortest[0] == acro_no_period or shortest[0] == acro_period
+            alias = match_bool
     else:
         alias = False
 
     return "alias={}".format(alias)
 
+
 def apposition(feats):
-    pass #TOMORROW
+    pass #TODO
+
+
+def semantic_class_agreement(feats):
+    pass #TODO
 
 ################
 # Anya's stuff #
@@ -206,10 +184,3 @@ def string_match(fs):
     j_cleaned=re.sub(r'(\W+)(\w)', r'\2', fs.token_ref).lower()
     #print i_cleaned,'\t',j_cleaned,'\t',(i_cleaned in j_cleaned) or (j_cleaned in i_cleaned),'\n'
     return "string_match={}".format((i_cleaned in j_cleaned) or (j_cleaned in i_cleaned))
-
-if __name__ == "__main__":
-    print dem_np(feats)
-    print number_agreement(feats)
-    print both_proper_name(feats)
-    print gender_agreement(feats)
-    print alias(feats)
