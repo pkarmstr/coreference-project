@@ -3,14 +3,18 @@
 from file_reader import TREES_DICTIONARY, POS_DICTIONARY, RAW_DICTIONARY, PRONOUN_LIST
 import re, os, nltk
 from nltk.corpus import names
-from feature_generator import FeatureRow
+from collections import namedtuple
 
 #################
 # Julia's stuff #
 #################
 
 #####tesing right now just with this named tuple and this coreference pair
-
+FeatureRow = namedtuple("GoldFeature", ["article", "sentence", "offset_begin",
+                                        "offset_end", "entity_type", "token",
+                                        "sentence_ref", "offset_begin_ref",
+                                        "offset_end_ref", "entity_type_ref",
+                                           "token_ref", "is_referent"])
 line = "NYT20001017.1908.0279.head.coref 6 31 32 ORG corporations 9 9 10 ORG companies yes"
 line = line.rstrip().split()
 feats = FeatureRow(*line)
@@ -18,9 +22,9 @@ feats = FeatureRow(*line)
 
 ##getting the POS until Keelan's branch is updated with the other dictionaries
 pos_files={}
-for f in os.listdir("/home/julia/progamitas/PyCharm/gitHub/coreference-project/postagged-files"):
+for f in os.listdir("pos_sentences"):
     pos_files[f[:-4]]=[]
-    for line in open(r"/home/julia/progamitas/PyCharm/gitHub/coreference-project/postagged-files/"+f,"r"):
+    for line in open(r"pos_sentences/"+f,"r"):
         if line!="\n":
             #print line
             pos_files[f[:-4]].append(line.rstrip())

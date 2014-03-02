@@ -6,7 +6,6 @@ __author__ = 'keelan'
 import codecs
 import argparse
 from collections import namedtuple
-from feature_functions import *
 
 FeatureRow = namedtuple("FeatureRow", ["article", "sentence", "offset_begin",
                                         "offset_end", "entity_type", "token",
@@ -48,6 +47,7 @@ class Featurizer:
                 f_out.write("{}\n".format(" ".join(row)))
 
 if __name__ == "__main__":
+    from feature_functions import *
     parser = argparse.ArgumentParser()
     parser.add_argument("input_file")
     parser.add_argument("output_file")
