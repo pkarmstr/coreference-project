@@ -19,7 +19,7 @@ def number_agreement(feats):
 
 
 def __get_pos__(fname,sent_num,start_index,end_index):
-    """from Anya with a bit of variation. WORKS"""
+    """from Anya, just changed the +.raw part. WORKS"""
     fname += ".raw"
     sent_num=int(sent_num)
     start_index=int(start_index)
