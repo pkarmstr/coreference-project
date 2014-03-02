@@ -69,15 +69,11 @@ def __determine_gender__(article, sentence, token, start_index, end_index, entit
                 return "male"
             elif token in ["she","her"]:
                 return "female"
-            else:
-                return "unknown"
         elif token.startswith("Mr.") or token.split("_")[0] in names.words("male.txt"):
             return "male"
         elif token.startswith("Mrs.") or token.split("_")[0] in names.words("female.txt"):
             return "female"
-        return "unknown"
-    else:
-        return "unknown"
+    return "unknown"
 
 
 def alias(feats):
