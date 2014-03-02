@@ -1,53 +1,42 @@
 __author__ = 'keelan'
 
 from os import listdir, path
-import re
 import sys
 import codecs
 
-def is_good(s):
-    return bool(re.search(r".+?_.+?", s))
-
 def sentence_maker(tokens):
-    return "<s>" + " ".join(tokens) + "</s>"
+    if tokens == "":
+        return tokens
+    return "<s> " + " ".join(tokens) + " </s>"
 
-if len(sys.argv) != 3:
-    sys.exit("Usage: python build_raw_sentences.py [pos_tagged directory] [output directory]")
+def pos_split(string):
+    if not string.startswith("_"):
+        return string.split("_")
+    else:
+        return [string[:-2], string[-1:]]
 
-print "looking at files from {0}...".format(sys.argv[1])
-for f in listdir(sys.argv[1]):
-    print "extracting tokens from {0}".format(f)
-    with codecs.open(path.join(sys.argv[1], f), "r") as f_in:
-        sentences = []
-        prev = ""
-        sent = []
-        for line in f_in:
-            line = line.rstrip()
-            if line == "":
-                if sent != []:
-                    tokens = zip(*[pair.split("_") for pair in sent])[0]
+if __name__ == "__main__":
+    if len(sys.argv) != 3:
+        sys.exit("Usage: python build_raw_sentences.py [pos_tagged directory] [output directory]")
+
+    print "looking at files from {0}...".format(sys.argv[1])
+    for f in listdir(sys.argv[1]):
+        print "extracting tokens from {0}".format(f)
+        with codecs.open(path.join(sys.argv[1], f), "r") as f_in:
+            sentences = []
+            for line in f_in:
+                line = line.rstrip()
+                if line == "":
+                    sentences.append("")
+                else:
+                    tokens = zip(*[pos_split(pair) for pair in line.split()])[0]
                     sentences.append(tokens)
-                    sent = []
-                prev = ""
-                continue
 
-            token_and_tag_list = line.split()
-            if prev != "" and sent != [] and (not (is_good(token_and_tag_list[0]) and is_good(sent[-1]))):
-                last = sent.pop()
-                token_and_tag_list[0] = last+token_and_tag_list[0]
-                print repr(last), repr(token_and_tag_list[0])
 
-            sent.extend(token_and_tag_list)
-            prev = line
+            sentence_strings = [sentence_maker(s) for s in sentences]
 
-        #clear any leftover sentence
-        if sent != []:
-            sentences.append(sent)
+            out_dir = path.join(sys.argv[2], f.strip(".pos"))
+            with codecs.open(out_dir, "w") as f_out:
+                f_out.write("\n".join(sentence_strings))
 
-        sentence_strings = [sentence_maker(s) for s in sentences]
-
-        out_dir = path.join(sys.argv[2], f.strip(".pos"))
-        with codecs.open(out_dir, "w") as f_out:
-            f_out.write("\n".join(sentence_strings))
-
-print "wrote everything to {0}\t[DONE]".format(sys.argv[2])
+    print "wrote everything to {0}\t[DONE]".format(sys.argv[2])
