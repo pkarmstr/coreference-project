@@ -11,8 +11,10 @@ def dem_np(feats):
 
 def number_agreement(feats):
     "WORKS"
-    i_number = determine_number(feats.article,feats.sentence, feats.token, feats.offset_begin,feats.offset_end)
-    j_number= determine_number(feats.article, feats.sentence_ref, feats.token_ref, feats.offset_begin_ref,feats.offset_end_ref)
+    i_number = determine_number(feats.article,feats.sentence, feats.token,
+                                feats.offset_begin,feats.offset_end)
+    j_number= determine_number(feats.article, feats.sentence_ref, feats.token_ref,
+                               feats.offset_begin_ref,feats.offset_end_ref)
     return "number_agreement={}".format(i_number==j_number)
 
 
