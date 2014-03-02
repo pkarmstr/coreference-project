@@ -34,7 +34,7 @@ class Featurizer:
             for line in f_in:
                 line = line.rstrip().split()
                 if self.no_tag:
-                    line.extend("")
+                    line.append("")
                 gold_data.append(FeatureRow(*line))
 
         return gold_data
