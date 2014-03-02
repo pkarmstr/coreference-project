@@ -35,13 +35,10 @@ def determine_number(article,sentence,token, start_index, end_index):
     if pos_tag == "PRP" or pos_tag == "PRP$":
         if token in ["they","them","their"]:
             return "plural"
-        else:
-            return "singular"
-    else:
-            if pos_tag == "NNS":
-                return "plural"
-            else:
-                return "singular"
+    elif pos_tag == "NNS":
+        return "plural"
+    return "singular"
+
 
 def both_proper_name(feats):
     """WORKS"""
