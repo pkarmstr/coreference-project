@@ -13,6 +13,13 @@ FeatureRow = namedtuple("FeatureRow", ["article", "sentence", "offset_begin",
                                         "offset_end_ref", "entity_type_ref",
                                         "token_ref", "is_referent"])
 
+def feature_list_reader(file_path):
+    ls = []
+    with open(file_path, "r") as f_in:
+        for line in f_in:
+            ls.append(eval(line.rstrip()))
+
+    return ls
 
 class Featurizer:
     def __init__(self, file_path, features, no_tag=False):
@@ -51,11 +58,16 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("input_file")
     parser.add_argument("output_file")
+    parser.add_argument("feature_list")
     parser.add_argument("-a", "--answers", help="the input file has the answers", action="store_true")
 
     all_args = parser.parse_args()
-    feat_funcs = [] #populate this with features
-    f = Featurizer(all_args.input_file, feat_funcs, not all_args.answers)
+    feature_funcs = [token, entity_type, token_ref, entity_type_ref]
+    feature_funcs.extend(feature_list_reader(all_args.feature_list))
+    if all_args.answers:
+        feature_funcs.insert(0, is_coreferent)
+    f = Featurizer(all_args.input_file, feature_funcs, not all_args.answers)
+    f.build_features()
     f.write_new_features(all_args.output_file)
     print "built your new feature vectors!"
 

@@ -3,7 +3,7 @@ __author__ = 'keelan'
 import os
 import re
 from nltk.corpus import BracketParseCorpusReader
-from build_raw_sentences import spesh_split
+from build_raw_sentences import pos_split
 
 def tree_reader():
     d = {}
@@ -21,8 +21,10 @@ def pos_reader():
         with open(os.path.join("pos_sentences", f), "r") as f_in:
             sentences = []
             for line in f_in:
-                pairs = [spesh_split(p) for p in line.rstrip().split()]
-                sentences.append(pairs)
+                line = line.rstrip()
+                if line != "":
+                    pairs = [pos_split(p) for p in line.split()]
+                    sentences.append(pairs)
             d[name] = sentences
     return d
 
@@ -32,8 +34,10 @@ def raw_reader():
         with open(os.path.join("raw_sentences", f), "r") as f_in:
             sentences = []
             for line in f_in:
-                tokens = line.split()[1:-1] #dont want <s> tags
-                sentences.append(tokens)
+                line = line.rstrip()
+                if line != "":
+                    tokens = line.split()[1:-1] #dont want <s> tags
+                    sentences.append(tokens)
             d[f] = sentences
     return d
 
@@ -52,8 +56,3 @@ RAW_DICTIONARY = raw_reader()
 POS_DICTIONARY = pos_reader()
 TREES_DICTIONARY = tree_reader()
 PRONOUN_LIST = pronoun_reader()
-
-if __name__ == "__main__":
-    print TREES_DICTIONARY["NYT20001230.1309.0093.head.coref.raw"]
-    print POS_DICTIONARY["NYT20001230.1309.0093.head.coref.raw"]
-    print RAW_DICTIONARY["NYT20001230.1309.0093.head.coref.raw"]

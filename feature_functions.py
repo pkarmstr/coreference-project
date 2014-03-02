@@ -5,6 +5,25 @@ import re, os, nltk
 from nltk.corpus import names
 from collections import namedtuple
 
+##################
+# basic features #
+##################
+
+def is_coreferent(fr):
+    return fr.is_referent
+
+def token(fr):
+    return "token={}".format(fr.token)
+
+def entity_type(fr):
+    return "entity_type={}".format(fr.entity_type)
+
+def token_ref(fr):
+    return "token_ref={}".format(fr.token_ref)
+
+def entity_type_ref(fr):
+    return "entity_type_ref={}".format(fr.entity_type_ref)
+
 #################
 # Julia's stuff #
 #################
@@ -164,9 +183,9 @@ def get_pos(fs,fname,sent_num,start_index,end_index):
     end_index=int(end_index)
     sent=POS_DICTIONARY[fname][sent_num]
 
-    word=" ".join(sent.split()[start_index:end_index])
+    word=sent[start_index:end_index]
 
-    pos=word.split('_')[-1]
+    pos=word[-1][1]
     #print fs.token,'\t',word,'\t',pos,'\n'
     return pos
 

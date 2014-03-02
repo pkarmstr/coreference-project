@@ -9,7 +9,7 @@ def sentence_maker(tokens):
         return tokens
     return "<s> " + " ".join(tokens) + " </s>"
 
-def spesh_split(string):
+def pos_split(string):
     if not string.startswith("_"):
         return string.split("_")
     else:
@@ -29,7 +29,7 @@ if __name__ == "__main__":
                 if line == "":
                     sentences.append("")
                 else:
-                    tokens = zip(*[spesh_split(pair) for pair in line.split()])[0]
+                    tokens = zip(*[pos_split(pair) for pair in line.split()])[0]
                     sentences.append(tokens)
 
 
