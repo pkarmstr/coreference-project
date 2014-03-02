@@ -62,9 +62,8 @@ def gender_agreement(feats):
 
 def __determine_gender__(article, sentence, token, start_index, end_index, entity_type):
     """WORKS"""
-    pos_tag = __get_pos__(article, sentence, start_index, end_index)
     if entity_type == "PER":
-        if pos_tag== "PRP" or pos_tag == "PRP$":
+        if token in PRONOUN_LIST:
             if token in ["he","his"]:
                 return "male"
             elif token in ["she","her"]:
