@@ -47,10 +47,20 @@ for i in range(len(gold_tag_list)):
     if gold_tag_list[i] != 'no' and gold_tag_list[i] == test_tag_list[i]:
         correct += 1
 
+print correct, test_total, gold_total
 
-precision = float(correct) / test_total
-recall = float(correct) / gold_total
-f = precision * recall * 2 / (precision + recall)
+try:
+    precision = float(correct) / test_total
+except ZeroDivisionError:
+    precision = 0.
+try:
+    recall = float(correct) / gold_total
+except ZeroDivisionError:
+    recall = 0.
+try:
+    f = precision * recall * 2 / (precision + recall)
+except ZeroDivisionError:
+    f = 0.
 
 #print correct, gold_total, test_total
 print 'precision =', precision, 'recall =', recall, 'f1 =', f
