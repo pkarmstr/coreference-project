@@ -2,8 +2,10 @@ __author__ = 'keelan'
 
 import os
 import re
+from collections import namedtuple
 from nltk.corpus import BracketParseCorpusReader
 from build_raw_sentences import pos_split
+
 
 def tree_reader():
     d = {}
@@ -47,6 +49,13 @@ def pronoun_reader():
         for line in f_in:
             ls.append(line.rstrip())
     return ls
+
+FeatureRow = namedtuple("FeatureRow", ["article", "sentence", "offset_begin",
+                                        "offset_end", "entity_type", "token",
+                                        "sentence_ref", "offset_begin_ref",
+                                        "offset_end_ref", "entity_type_ref",
+                                        "token_ref", "i_cleaned", "j_cleaned",
+                                        "is_referent"])
 
 ###########################
 # `final` data structures #

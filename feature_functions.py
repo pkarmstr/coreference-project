@@ -1,9 +1,10 @@
 """put your feature functions in here!"""
 
-from file_reader import TREES_DICTIONARY, POS_DICTIONARY, RAW_DICTIONARY, PRONOUN_LIST
+from file_reader import TREES_DICTIONARY, POS_DICTIONARY, RAW_DICTIONARY, PRONOUN_LIST, FeatureRow
 import re, os, nltk
 from nltk.corpus import names
 from collections import namedtuple
+
 
 ##################
 # basic features #
@@ -29,12 +30,7 @@ def entity_type_ref(fr):
 #################
 
 #####tesing right now just with this named tuple and this coreference pair
-FeatureRow = namedtuple("GoldFeature", ["article", "sentence", "offset_begin",
-                                        "offset_end", "entity_type", "token",
-                                        "sentence_ref", "offset_begin_ref",
-                                        "offset_end_ref", "entity_type_ref",
-                                           "token_ref", "is_referent"])
-line = "NYT20001017.1908.0279.head.coref 6 31 32 ORG corporations 9 9 10 ORG companies yes"
+line = "NYT20001017.1908.0279.head.coref 6 31 32 ORG corporations 9 9 10 ORG companies corporations companies yes"
 line = line.rstrip().split()
 feats = FeatureRow(*line)
 

@@ -5,13 +5,6 @@ __author__ = 'keelan'
 
 import codecs
 import argparse
-from collections import namedtuple
-
-FeatureRow = namedtuple("FeatureRow", ["article", "sentence", "offset_begin",
-                                        "offset_end", "entity_type", "token",
-                                        "sentence_ref", "offset_begin_ref",
-                                        "offset_end_ref", "entity_type_ref",
-                                        "token_ref", "is_referent"])
 
 def feature_list_reader(file_path):
     ls = []
@@ -33,11 +26,21 @@ class Featurizer:
         with codecs.open(self.file_path, "r") as f_in:
             for line in f_in:
                 line = line.rstrip().split()
+                i_token = line[5]
+                j_token = line[10]
                 if self.no_tag:
+                    line.append(self._clean(i_token))
+                    line.append(self._clean(j_token))
                     line.append("")
+                else:
+                    line.insert(-1, self._clean(i_token))
+                    line.insert(-1, self._clean(j_token))
                 gold_data.append(FeatureRow(*line))
 
         return gold_data
+
+    def _clean(self, token):
+        return re.sub(r'(\W+)(\w)', r'\2', token).lower()
 
     def build_features(self):
         self.new_features = []
