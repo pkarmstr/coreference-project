@@ -15,5 +15,5 @@ TYPE="$2"
 	-input=$EXPERIMENT_DIR/$TYPE.notag > $EXPERIMENT_DIR/$TYPE.tagged
 
 # evaluation
-python coref-evaluator.py resources/coref-"$TYPE"set.gold \
+python coref-evaluator.py $EXPERIMENT_DIR/$TYPE.gold \
 	$EXPERIMENT_DIR/$TYPE.tagged > $EXPERIMENT_DIR/"$TYPE"_eval.txt
