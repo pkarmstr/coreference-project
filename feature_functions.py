@@ -2,6 +2,9 @@
 from file_reader import TREES_DICTIONARY, POS_DICTIONARY, RAW_DICTIONARY, PRONOUN_LIST, FeatureRow
 import re, os, nltk
 from nltk.corpus import names
+from nltk.corpus import wordnet as wn
+
+
 
 
 def dem_np(feats):
@@ -110,8 +113,15 @@ def apposition(feats):
     pass #TODO
 
 
-def semantic_class_agreement(feats):
-    pass #TODO
+def entity_type_agreement(feats):
+    ##intuition similar to sem_class agreement (not implemented)
+    """WORKS"""
+    i_entity_type = feats.entity_type
+    j_entity_type = feats.entity_type_ref
+    return "entity_type_agreement={}".format(i_entity_type == j_entity_type)
+
+
+
 
 
 

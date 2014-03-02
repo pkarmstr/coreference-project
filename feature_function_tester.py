@@ -80,7 +80,13 @@ class FeatureTest(unittest.TestCase):
         self.assertEqual(alias(feats1).endswith("True"),True)
         self.assertEqual(alias(feats2).endswith("True"),True)
 
-
+    def test_entity_type_agreement(self):
+        line1 = "NYT20001111.1247.0093.head.coref 9 27 29 LOC West_Bank 21 0 1 PER Mohtaseb West_Bank Mohtaseb no".rstrip().split()
+        feats1 = FeatureRow(*line1)
+        line2 = "NYT20001023.2203.0479.head.coref 17 10 11 PER governor 32 15 16 PER Andrew governor Andrew no".rstrip().split()
+        feats2 = FeatureRow(*line2)
+        self.assertEqual(entity_type_agreement(feats1).endswith("False"),True)
+        self.assertEqual(entity_type_agreement(feats2).endswith("True"),True)
 
 
 
