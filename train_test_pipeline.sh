@@ -1,3 +1,4 @@
+#!/bin/sh
 EXPERIMENT_DIR="$1"
 TYPE="$2"
 
