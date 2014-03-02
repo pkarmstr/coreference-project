@@ -7,7 +7,7 @@ from nltk.corpus import names
 def dem_np(feats):
     """WORKS!"""
     dem_re = re.findall(r"these|this|that|those",feats.j_cleaned) #yes, only j!
-    return "dem_np={}".format(len(dem_re)>0)
+    return "dem_np={}".format(len(dem_re) > 0)
 
 def number_agreement(feats):
     "WORKS"
@@ -20,7 +20,7 @@ def number_agreement(feats):
 
 def __get_pos__(fname,sent_num,start_index,end_index):
     """from Anya with a bit of variation. WORKS"""
-    fname = fname+".raw"
+    fname += ".raw"
     sent_num=int(sent_num)
     start_index=int(start_index)
     end_index=int(end_index)
@@ -32,7 +32,7 @@ def __get_pos__(fname,sent_num,start_index,end_index):
 def determine_number(article,sentence,token, start_index, end_index):
     """WORKS"""
     pos_tag = __get_pos__(article,sentence,start_index, end_index)
-    if pos_tag== "PRP" or pos_tag == "PRP$":
+    if pos_tag == "PRP" or pos_tag == "PRP$":
         if token in ["they","them","their"]:
             return "plural"
         else:
@@ -45,8 +45,8 @@ def determine_number(article,sentence,token, start_index, end_index):
 
 def both_proper_name(feats):
     """WORKS"""
-    i_pos = __get_pos__(feats.article,feats.sentence,feats.offset_begin,feats.offset_end)
-    j_pos = __get_pos__(feats.article,feats.sentence_ref,feats.offset_begin_ref,feats.offset_end_ref)
+    i_pos = __get_pos__(feats.article, feats.sentence, feats.offset_begin, feats.offset_end)
+    j_pos = __get_pos__(feats.article, feats.sentence_ref, feats.offset_begin_ref, feats.offset_end_ref)
     return "both_proper_name={}".format(i_pos == "NNP" and i_pos == j_pos)
 
 
@@ -54,18 +54,18 @@ def both_proper_name(feats):
 def gender_agreement(feats):
     """WORKS"""
     i_gender = determine_gender(feats.article, feats.sentence, feats.i_cleaned,
-                                feats.offset_begin,feats.offset_end, feats.entity_type)
+                                feats.offset_begin, feats.offset_end, feats.entity_type)
     j_gender=determine_gender(feats.article, feats.sentence_ref, feats.j_cleaned,
                               feats.offset_begin_ref,feats.offset_end_ref, feats.entity_type_ref)
     if i_gender == "unknown" or j_gender == "unknown":
-        agreement="unknown"
+        agreement = "unknown"
     else:
         agreement = i_gender == j_gender
     return "gender_agreement={}".format(agreement)
 
-def determine_gender(article,sentence, token, start_index, end_index, entity_type):
+def determine_gender(article, sentence, token, start_index, end_index, entity_type):
     """WORKS"""
-    pos_tag = __get_pos__(article,sentence,start_index, end_index)
+    pos_tag = __get_pos__(article, sentence, start_index, end_index)
     if entity_type == "PER":
         if pos_tag== "PRP" or pos_tag == "PRP$":
             if token in ["he","his"]:
@@ -91,22 +91,23 @@ def alias(feats):
         alias = i_tokens[len(i_tokens)-1] == j_tokens[len(j_tokens)-1] #Murray_Schwartz, Schwartz.
     elif feats.entity_type == "ORG" and feats.entity_type_ref == "ORG":
         postmodifiers = ["Corp.", "Ltd."]
-        if len(i_tokens)>len(j_tokens):
+        if len(i_tokens) > len(j_tokens):
             longest = i_tokens
             shortest = j_tokens
-        elif len(j_tokens)>len(i_tokens):
+        elif len(j_tokens) > len(i_tokens):
             longest = j_tokens
-            shortest=i_tokens
+            shortest = i_tokens
         else:
-            longest=None
+            longest = None
             alias = False
-        if longest!=None:
+        if longest != None:
             for m in postmodifiers:
                 if m in longest:
                     longest.remove(m)
             acro_no_period = "".join([w[0] for w in longest if w.istitle()])
             acro_period = "".join([w[0]+"." for w in longest if w.istitle()])
-            alias = shortest[0]==acro_no_period or shortest[0] == acro_period
+            match_bool = shortest[0] == acro_no_period or shortest[0] == acro_period
+            alias = match_bool
     else:
         alias = False
 
