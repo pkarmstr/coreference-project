@@ -72,7 +72,7 @@ if __name__ == "__main__":
     f = Featurizer(all_args.input_file, feature_funcs, not all_args.answers)
     f.build_features()
     f.write_new_features(all_args.output_file)
-    print "built your new feature vectors!"
+    print "built your new feature vectors at {}".format(all_args.output_file)
 
 
 
