@@ -10,12 +10,6 @@ class FeatureTest(unittest.TestCase):
     def setUp(self):
         self.article_title = "NYT20001230.1309.0093.head.coref.raw"
 
-    def test_file_reader(self):
-        self.assertTrue(RAW_DICTIONARY.has_key(self.article_title))
-        self.assertTrue(POS_DICTIONARY.has_key(self.article_title))
-        self.assertTrue(TREES_DICTIONARY.has_key(self.article_title))
-        self.assertTrue("they" in PRONOUN_LIST)
-
     ##quick note: in each line i have added manually the corresponding i_cleaned and j_cleaned before the coref-label.
     def test_dem_np(self):
         #this line does not exist in the data, but it would be the perfect example for the feature
@@ -79,6 +73,22 @@ class FeatureTest(unittest.TestCase):
         feats2 = FeatureRow(*line2)
         self.assertEqual(alias(feats1).endswith("True"),True)
         self.assertEqual(alias(feats2).endswith("True"),True)
+
+    def test_entity_type_agreement(self):
+        line1 = "NYT20001111.1247.0093.head.coref 9 27 29 LOC West_Bank 21 0 1 PER Mohtaseb West_Bank Mohtaseb no".rstrip().split()
+        feats1 = FeatureRow(*line1)
+        line2 = "NYT20001023.2203.0479.head.coref 17 10 11 PER governor 32 15 16 PER Andrew governor Andrew no".rstrip().split()
+        feats2 = FeatureRow(*line2)
+        self.assertEqual(entity_type_agreement(feats1).endswith("False"),True)
+        self.assertEqual(entity_type_agreement(feats2).endswith("True"),True)
+
+    def test_apposition(self):
+        line1 = "NYT20001020.2025.0304.head.coref 26 26 28 PER Mark_Madden 26 29 30 PER manager Mark_Madden manager yes".rstrip().split()
+        feats1 = FeatureRow(*line1)
+        line2 = "NYT20001020.2025.0304.head.coref 31 1 3 PER Howard_Klein 31 6 7 PER broker Howard_Klein broker yes".rstrip().split()
+        feats2 = FeatureRow(*line2)
+        self.assertEqual(apposition(feats1).endswith("True"),True)
+        self.assertEqual(apposition(feats2).endswith("True"),True)
 
 if __name__ == "__main__":
     unittest.main()
