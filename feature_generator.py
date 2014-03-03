@@ -65,7 +65,7 @@ if __name__ == "__main__":
     parser.add_argument("-a", "--answers", help="the input file has the answers", action="store_true")
 
     all_args = parser.parse_args()
-    feature_funcs = [token, entity_type, token_ref, entity_type_ref]
+    feature_funcs = []
     feature_funcs.extend(feature_list_reader(all_args.feature_list))
     if all_args.answers:
         feature_funcs.insert(0, is_coreferent)
