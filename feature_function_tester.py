@@ -88,7 +88,13 @@ class FeatureTest(unittest.TestCase):
         self.assertEqual(entity_type_agreement(feats1).endswith("False"),True)
         self.assertEqual(entity_type_agreement(feats2).endswith("True"),True)
 
-
+    def test_apposition(self):
+        line1 = "NYT20001020.2025.0304.head.coref 26 26 28 PER Mark_Madden 26 29 30 PER manager Mark_Madden manager yes".rstrip().split()
+        feats1 = FeatureRow(*line1)
+        line2 = "NYT20001020.2025.0304.head.coref 31 1 3 PER Howard_Klein 31 6 7 PER broker Howard_Klein broker yes".rstrip().split()
+        feats2 = FeatureRow(*line2)
+        self.assertEqual(apposition(feats1).endswith("True"),True)
+        self.assertEqual(apposition(feats2).endswith("True"),True)
 
 if __name__ == "__main__":
     unittest.main()

@@ -3,8 +3,7 @@ from file_reader import TREES_DICTIONARY, POS_DICTIONARY, RAW_DICTIONARY, PRONOU
 import re, os, nltk
 from nltk.corpus import names
 from nltk.corpus import wordnet as wn
-
-
+from nltk.tree import ParentedTree
 
 
 def dem_np(feats):
@@ -119,6 +118,42 @@ def entity_type_agreement(feats):
     i_entity_type = feats.entity_type
     j_entity_type = feats.entity_type_ref
     return "entity_type_agreement={}".format(i_entity_type == j_entity_type)
+
+
+
+def apposition(feats): #this was driving me MAD....I SHOULD CORRECT THE STYLE...aarrrrggghhshs
+    """WORKS WITH THE EXAMPLES IN UNITTEST, HOPE THEY WERE NOT A COINDIDENCE"""
+    sentence_tree = TREES_DICTIONARY[feats.article+".raw"][int(feats.sentence_ref)]
+    ptree = ParentedTree.convert(sentence_tree)
+    i_head = feats.i_cleaned.split("_")[0]
+    def is_j_apposition(curr_tree):
+        found = False
+        for child in curr_tree:
+            if isinstance(child,ParentedTree):
+                found = is_j_apposition(child)
+                if found:
+                    break
+            else: #a leaf
+                parent = curr_tree.parent()
+                leaf_is_noun = curr_tree.node=="NN" or curr_tree == "NNS"
+                if leaf_is_noun:
+                    available_elders = isinstance(parent,ParentedTree) and \
+                                       isinstance(parent.parent(),ParentedTree)
+                    if available_elders:
+                        if parent.node== "NP":
+                            greatuncle = parent.parent().left_sibling()
+                            if isinstance(greatuncle,ParentedTree):
+                                previous_words = greatuncle.parent().leaves()
+                                meets_constraits = greatuncle.node == "," and i_head in previous_words
+                                if meets_constraits:
+                                    found = True
+                if found:
+                    break
+        return found
+
+    return "apposition={}".format(is_j_apposition(ptree))
+
+
 
 
 
