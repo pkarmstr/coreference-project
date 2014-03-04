@@ -105,7 +105,6 @@ class FeatureTest(unittest.TestCase):
         sentence_tree2 = TREES_DICTIONARY[feats1.article+".raw"][int(feats2.sentence)]
         ptree1 = ParentedTree.convert(sentence_tree)
         ptree2 = ParentedTree.convert(sentence_tree2)
-        print ptree1, ptree2
         self.assertEqual(__is_subject__(ptree1,feats1.i_cleaned),True)
         self.assertEqual(__is_subject__(ptree1,feats1.j_cleaned),False)
         self.assertEqual(__is_subject__(ptree1,feats1.i_cleaned),True)
