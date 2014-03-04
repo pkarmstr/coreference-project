@@ -172,6 +172,14 @@ def both_subjects(feats):
     return "both_subjects={}".format(i_subject==j_subject)
 
 
+def none_is_subject(feats):
+    sentence_tree = TREES_DICTIONARY[feats.article+".raw"][int(feats.sentence_ref)]
+    ptree = ParentedTree.convert(sentence_tree)
+    i_subject = __is_subject__(ptree,feats.i_cleaned)
+    j_subject = __is_subject__(ptree,feats.j_cleaned)
+    return "none_is_subject={}".format(i_subject==False and i_subject == j_subject)
+
+
 
 
 
