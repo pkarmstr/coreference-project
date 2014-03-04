@@ -94,7 +94,7 @@ def alias(feats):
         else:
             longest = None
             alias = False
-        if longest != None:
+        if isinstance(longest,list):
             for m in postmodifiers:
                 if m in longest:
                     longest.remove(m)
