@@ -110,5 +110,18 @@ class FeatureTest(unittest.TestCase):
         self.assertEqual(__is_subject__(ptree1,feats1.i_cleaned),True)
 
 
+    def test_animacy_agreement(self):
+        line1 = "NYT20001111.1247.0093.head.coref 9 27 29 LOC West_Bank 21 0 1 PER Mohtaseb West_Bank Mohtaseb no".rstrip().split()
+        feats1 = FeatureRow(*line1)
+        line2 = "NYT20001020.2025.0304.head.coref 31 1 3 PER Howard_Klein 31 6 7 PER broker Howard_Klein broker yes".rstrip().split()
+        feats2 = FeatureRow(*line2)
+        line3= "NYT20001111.1247.0093.head.coref 13 23 25 GPE Gush_Katif 15 12 13 WEA rifles Gush_Katif rifles no".rstrip().split()
+        feats3 = FeatureRow(*line3)
+        self.assertEqual(animacy_agreement(feats1).endswith("False"),True)
+        self.assertEqual(animacy_agreement(feats2).endswith("True"),True)
+        self.assertEqual(animacy_agreement(feats3).endswith("True"),True)
+
+
+
 if __name__ == "__main__":
     unittest.main()

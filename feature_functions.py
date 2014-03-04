@@ -194,6 +194,14 @@ def j_is_subject(feats):
     return "j_is_subject={}".format(j_subject)
 
 
+def animacy_agreement(feats):
+    both_people = feats.entity_type == "PER" and feats.entity_type_ref == "PER"
+    both_not_people = feats.entity_type != "PER" and feats.entity_type_ref != "PER"
+    return "animacy_agreement={}".format(both_people or both_not_people)
+
+
+
+
 
 
 
