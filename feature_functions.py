@@ -108,10 +108,6 @@ def alias(feats):
     return "alias={}".format(alias)
 
 
-def apposition(feats):
-    pass #TODO
-
-
 def entity_type_agreement(feats):
     ##intuition similar to sem_class agreement (not implemented)
     """WORKS"""
