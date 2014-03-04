@@ -180,6 +180,20 @@ def none_is_subject(feats):
     return "none_is_subject={}".format(i_subject==False and i_subject == j_subject)
 
 
+def i_is_subject(feats):
+    sentence_tree = TREES_DICTIONARY[feats.article+".raw"][int(feats.sentence_ref)]
+    ptree = ParentedTree.convert(sentence_tree)
+    i_subject = __is_subject__(ptree,feats.i_cleaned)
+    return "i_is_subject={}".format(i_subject)
+
+
+def j_is_subject(feats):
+    sentence_tree = TREES_DICTIONARY[feats.article+".raw"][int(feats.sentence_ref)]
+    ptree = ParentedTree.convert(sentence_tree)
+    j_subject = __is_subject__(ptree,feats.j_cleaned)
+    return "j_is_subject={}".format(j_subject)
+
+
 
 
 
