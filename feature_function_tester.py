@@ -2,7 +2,7 @@ __author__ = 'keelan,julia'
 
 import unittest
 from feature_functions import *
-from feature_functions import __determine_number__, __determine_gender__
+from feature_functions import __determine_number__, __determine_gender__, __is_subject__
 from file_reader import RAW_DICTIONARY, POS_DICTIONARY, TREES_DICTIONARY, PRONOUN_LIST, FeatureRow
 
 class FeatureTest(unittest.TestCase):
@@ -95,6 +95,21 @@ class FeatureTest(unittest.TestCase):
         feats2 = FeatureRow(*line2)
         self.assertEqual(apposition(feats1).endswith("True"),True)
         self.assertEqual(apposition(feats2).endswith("True"),True)
+
+    def test__is_subject__(self):
+        line1 = "NYT20001102.1839.0338.head.coref 9 16 17 PER he 18 7 8 ORG itself he itself no".rstrip().split()
+        feats1 = FeatureRow(*line1)
+        line2 = "NYT20001102.1839.0338.head.coref 12 3 4 PER Levitt 18 7 8 ORG itself Levitt itself no".rstrip().split()
+        feats2 = FeatureRow(*line2)
+        sentence_tree = TREES_DICTIONARY[feats1.article+".raw"][int(feats1.sentence)]
+        sentence_tree2 = TREES_DICTIONARY[feats1.article+".raw"][int(feats2.sentence)]
+        ptree1 = ParentedTree.convert(sentence_tree)
+        ptree2 = ParentedTree.convert(sentence_tree2)
+        print ptree1, ptree2
+        self.assertEqual(__is_subject__(ptree1,feats1.i_cleaned),True)
+        self.assertEqual(__is_subject__(ptree1,feats1.j_cleaned),False)
+        self.assertEqual(__is_subject__(ptree1,feats1.i_cleaned),True)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -147,6 +147,37 @@ def apposition(feats): #this was driving me MAD....I SHOULD CORRECT THE STYLE...
     return "apposition={}".format(is_j_apposition(ptree))
 
 
+def __is_subject__(curr_tree,token):
+    found = False
+    for child in curr_tree:
+        if isinstance(child, ParentedTree):
+            conditions = token in "_".join(child.leaves()) and curr_tree.node == "NP"
+            if conditions:
+                left_brother = curr_tree.left_sibling()
+                right_brother = curr_tree.right_sibling()
+                if isinstance(left_brother, ParentedTree): #SOV
+                    if left_brother.node == "VP":
+                        found = True
+                if isinstance(right_brother,ParentedTree): #OVS
+                    if right_brother.node == "VP":
+                        found = True
+            else:
+                found = __is_subject__(child,token)
+        if found:
+            break
+    return found
+
+
+def both_subjects(feats):
+    sentence_tree = TREES_DICTIONARY[feats.article+".raw"][int(feats.sentence_ref)]
+    ptree = ParentedTree.convert(sentence_tree)
+    i_subject = __is_subject__(ptree,feats.i_cleaned)
+    j_subject = __is_subject__(ptree,feats.j_cleaned)
+    return "both_subjects={}".format(i_subject==j_subject)
+
+
+
+
 
     #OTHER VERSION, DIDN'T REMOVE IT JUST IN CASE
     #def is_j_apposition(curr_tree):
