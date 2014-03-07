@@ -2,7 +2,7 @@ __author__ = 'keelan,julia'
 
 import unittest
 from feature_functions import *
-from feature_functions import __determine_number__, __determine_gender__, __is_subject__
+from feature_functions import __determine_number__, __determine_gender__, __is_subject__, __get_parent_tree__
 from file_reader import RAW_DICTIONARY, POS_DICTIONARY, TREES_DICTIONARY, PRONOUN_LIST, FeatureRow
 
 class FeatureTest(unittest.TestCase):
@@ -17,14 +17,20 @@ class FeatureTest(unittest.TestCase):
         self.assertTrue("they" in PRONOUN_LIST)
 
     ##quick note: in each line i have added manually the corresponding i_cleaned and j_cleaned before the coref-label.
-    def test_dem_np(self):
+    def test_dem_token(self):
         #this line does not exist in the data, but it would be the perfect example for the feature
         line1 = "NYT20001102.1839.0340.head.coref 17 2 3 PER candidates 30 8 9 PER those candidates those no".rstrip().split()
         feats1 = FeatureRow(*line1)
         line2 = "NYT20001111.1247.0093.head.coref 19 5 7 LOC West_Bank 21 32 33 GPE city West_Bank city no".rstrip().split()
         feats2 = FeatureRow(*line2)
+        self.assertEqual(dem_token(feats1).endswith("True"),True)
+        self.assertEquals(dem_token(feats2).endswith("False"),True)
+
+    def dem_np(self):
+        line1 = "NYT20001111.1247.0093.head.coref 7 13 14 LOC area 13 5 6 PER they area they no".rstrip().split()
+        feats1 = FeatureRow(*line1)
         self.assertEqual(dem_np(feats1).endswith("True"),True)
-        self.assertEquals(dem_np(feats2).endswith("False"),True)
+
     def test__determine_number__(self):
         line1 = "NYT20001111.1247.0093.head.coref 13 5 6 PER they 15 12 13 WEA rifles they rifles no".rstrip().split()
         feats1=FeatureRow(*line1)
@@ -101,13 +107,26 @@ class FeatureTest(unittest.TestCase):
         feats1 = FeatureRow(*line1)
         line2 = "NYT20001102.1839.0338.head.coref 12 3 4 PER Levitt 18 7 8 ORG itself Levitt itself no".rstrip().split()
         feats2 = FeatureRow(*line2)
-        sentence_tree = TREES_DICTIONARY[feats1.article+".raw"][int(feats1.sentence)]
-        sentence_tree2 = TREES_DICTIONARY[feats1.article+".raw"][int(feats2.sentence)]
-        ptree1 = ParentedTree.convert(sentence_tree)
-        ptree2 = ParentedTree.convert(sentence_tree2)
-        self.assertEqual(__is_subject__(ptree1,feats1.i_cleaned),True)
-        self.assertEqual(__is_subject__(ptree1,feats1.j_cleaned),False)
-        self.assertEqual(__is_subject__(ptree1,feats1.i_cleaned),True)
+        line3 = "NYT20001102.1839.0338.head.coref 20 32 33 PER brokers 32 19 20 PER clients brokers clients no".rstrip().split()
+        feats3 = FeatureRow(*line3)
+        line4 = "NYT20001102.1839.0338.head.coref 20 33 34 PER who 32 19 20 PER clients who clients no".rstrip().split()
+        feats4 = FeatureRow(*line4)
+        tree1_i = ParentedTree.convert(TREES_DICTIONARY[feats1.article+".raw"][int(feats1.sentence)])
+        tree1_j = ParentedTree.convert(TREES_DICTIONARY[feats1.article+".raw"][int(feats1.sentence_ref)])
+        tree2_i = ParentedTree.convert(TREES_DICTIONARY[feats2.article+".raw"][int(feats2.sentence)])
+        tree3_i = ParentedTree.convert(TREES_DICTIONARY[feats3.article+".raw"][int(feats3.sentence)])
+        tree4_i = ParentedTree.convert(TREES_DICTIONARY[feats4.article+".raw"][int(feats4.sentence)])
+        parent1_i = __get_parent_tree__(feats1.token, tree1_i)
+        parent1_j = __get_parent_tree__(feats1.token_ref, tree1_j)
+        parent2_i = __get_parent_tree__(feats2.token, tree2_i)
+        parent3_i = __get_parent_tree__(feats3.token, tree3_i)
+        parent4_i = __get_parent_tree__(feats4.token, tree4_i)
+        self.assertEqual(__is_subject__(tree1_i,feats1.token, parent1_i),True)
+        self.assertEqual(__is_subject__(tree1_j,feats1.token_ref,parent1_j),False)
+        self.assertEqual(__is_subject__(tree2_i,feats2.token, parent2_i),True)
+        self.assertEqual(__is_subject__(tree3_i,feats3.token, parent3_i),False)
+        self.assertEqual(__is_subject__(tree4_i,feats4.token, parent4_i),True)
+
 
 
     def test_animacy_agreement(self):
@@ -120,6 +139,9 @@ class FeatureTest(unittest.TestCase):
         self.assertEqual(animacy_agreement(feats1).endswith("False"),True)
         self.assertEqual(animacy_agreement(feats2).endswith("True"),True)
         self.assertEqual(animacy_agreement(feats3).endswith("True"),True)
+
+
+
 
 
 

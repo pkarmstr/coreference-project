@@ -6,10 +6,23 @@ from nltk.corpus import wordnet as wn
 from nltk.tree import ParentedTree
 
 
-def dem_np(feats):
+def dem_token(feats):
     """WORKS!"""
     dem_re = re.findall(r"these|this|that|those",feats.j_cleaned) #yes, only j!
-    return "dem_np={}".format(len(dem_re) > 0)
+    return "dem_token={}".format(len(dem_re) > 0)
+
+def dem_np(feats):
+    fname = feats.article +".raw"
+    sent=POS_DICTIONARY[fname][feats.sentence_ref]
+    if feats.offset_begin_ref>3:
+        window = sent[feats.offset_begin_ref-3:feats.offset_begin_ref+1]
+    else:
+        window = sent[0:feats.offset_begin_ref+1]
+    dems=set('this','these','that','those')
+    match = dems.intersection(set(window))
+    return "dem_j={}".format(len(match)>0)
+
+
 
 def number_agreement(feats):
     "WORKS"
@@ -122,77 +135,121 @@ def apposition(feats): #this was driving me MAD....I SHOULD CORRECT THE STYLE...
     sentence_tree = TREES_DICTIONARY[feats.article+".raw"][int(feats.sentence_ref)]
     ptree = ParentedTree.convert(sentence_tree)
     def is_j_apposition(curr_tree):
-        found = False
-        for child in curr_tree:
-            if isinstance(child, ParentedTree):
-                conditions = feats.j_cleaned in "_".join(child.leaves()) and curr_tree.node == "NP"
-                if conditions:
-                    brother = child.left_sibling()
-                    if isinstance(brother, ParentedTree):
-                        if brother.node == ",":
-                            antecedent = brother.left_sibling()
-                            if isinstance(antecedent,ParentedTree):
-                                previous_words = antecedent.leaves()
-                                if feats.i_cleaned in "_".join(previous_words):
-                                    found = True
-                else:
-                    found = is_j_apposition(child)
-            if found:
-                break
-        return found
+            found = False
+            for child in curr_tree:
+                if isinstance(child, ParentedTree):
+                    conditions = feats.token_ref in "_".join(child.leaves()) and curr_tree.node == "NP"
+                    if conditions:
+                        brother = child.left_sibling()
+                        if isinstance(brother, ParentedTree):
+                            if brother.node == ",":
+                                antecedent = brother.left_sibling()
+                                if isinstance(antecedent,ParentedTree):
+                                    previous_words = antecedent.leaves()
+                                    if feats.token in "_".join(previous_words):
+                                        found = True
+                    else:
+                        found = is_j_apposition(child)
+                if found:
+                    break
+            return found
     return "apposition={}".format(is_j_apposition(ptree))
 
 
-def __is_subject__(curr_tree,token):
+#ANYA'S  :)
+def __get_parent_tree__(unclean_token, t):
+    words = unclean_token.split('_')
+    leaf_indices=[]
+    for word in words:
+        word=re.sub(r'O\'|d\'|;T','',re.sub(r'\'s$','',re.sub(r'[^\w\s.]+$','',re.sub(r'^[^\w\s-]+','',word))))
+        word=re.sub(r'Bond/|/ABC','',word)
+        if word=='':
+            word='&'
+        elif word=='CBS' and word not in t.leaves():
+            continue
+        elif word=='AMP' and word not in t.leaves():
+            word='&AMP'
+        elif word not in t.leaves():
+            #print statement for debugging
+            #print t.leaves()
+            pass
+        leaf_indices.append(t.leaves().index(word))
+
+    start=leaf_indices[0]
+    end=leaf_indices[-1]
+
+    if end > start:
+        position_tuple=t.treeposition_spanning_leaves(start,end)
+    else:
+        position_tuple=t.leaf_treeposition(start)
+
+    parent_tree=t[position_tuple[:-2]]
+    return parent_tree
+
+
+def __is_subject__(curr_tree,token, parent):
     found = False
     for child in curr_tree:
         if isinstance(child, ParentedTree):
-            conditions = token in "_".join(child.leaves()) and curr_tree.node == "NP"
-            if conditions:
-                left_brother = curr_tree.left_sibling()
-                right_brother = curr_tree.right_sibling()
-                if isinstance(left_brother, ParentedTree): #SOV
+            if child == parent and (child.node == "NP" or child.node == "WHNP"):
+                left_brother = child.left_sibling()
+                right_brother = child.right_sibling()
+                if isinstance(left_brother, ParentedTree): #SVO
                     if left_brother.node == "VP":
                         found = True
                 if isinstance(right_brother,ParentedTree): #OVS
-                    if right_brother.node == "VP":
+                    if right_brother.node == "VP" or right_brother.node == "S":
                         found = True
             else:
-                found = __is_subject__(child,token)
+                found = __is_subject__(child,token, parent)
         if found:
             break
     return found
 
+    ######FOR PREVIOUS FUNCTION, WITHOUT THE GIVEN PARENT
+    found = False
+    #for child in curr_tree:
+    #    if isinstance(child, ParentedTree):
+    #        conditions = token in "_".join(child.leaves()) and curr_tree.node == "NP"
+    #        if conditions:
+    #            left_brother = curr_tree.left_sibling()
+    #            right_brother = curr_tree.right_sibling()
+    #            if isinstance(left_brother, ParentedTree): #SOV
+    #                if left_brother.node == "VP":
+    #                    found = True
+    #            if isinstance(right_brother,ParentedTree): #OVS
+    #                if right_brother.node == "VP":
+    #                    found = True
+    #        else:
+    #            found = __is_subject__(child,token)
+    #    if found:
+    #        break
+    #return found
 
-def both_subjects(feats):
-    sentence_tree = TREES_DICTIONARY[feats.article+".raw"][int(feats.sentence_ref)]
-    ptree = ParentedTree.convert(sentence_tree)
-    i_subject = __is_subject__(ptree,feats.i_cleaned)
-    j_subject = __is_subject__(ptree,feats.j_cleaned)
-    return "both_subjects={}".format(i_subject==j_subject)
-
-
-def none_is_subject(feats):
-    sentence_tree = TREES_DICTIONARY[feats.article+".raw"][int(feats.sentence_ref)]
-    ptree = ParentedTree.convert(sentence_tree)
-    i_subject = __is_subject__(ptree,feats.i_cleaned)
-    j_subject = __is_subject__(ptree,feats.j_cleaned)
-    return "none_is_subject={}".format(i_subject==False and i_subject == j_subject)
 
 
 def i_is_subject(feats):
     sentence_tree = TREES_DICTIONARY[feats.article+".raw"][int(feats.sentence_ref)]
     ptree = ParentedTree.convert(sentence_tree)
-    i_subject = __is_subject__(ptree,feats.i_cleaned)
+    parent = __get_parent_tree__(feats.token, ptree)
+    i_subject = __is_subject__(ptree,feats.token)
     return "i_is_subject={}".format(i_subject)
-
 
 def j_is_subject(feats):
     sentence_tree = TREES_DICTIONARY[feats.article+".raw"][int(feats.sentence_ref)]
     ptree = ParentedTree.convert(sentence_tree)
-    j_subject = __is_subject__(ptree,feats.j_cleaned)
+    parent = __get_parent_tree__(feats.token_ref, ptree)
+    j_subject = __is_subject__(ptree,feats.token_ref)
     return "j_is_subject={}".format(j_subject)
 
+def both_subjects(feats):
+    both_bool = i_is_subject(feats).endswith("True") and j_is_subject(feats).endswith("True")
+    return "both_subjects={}".format(both_bool)
+
+
+def none_is_subject(feats):
+    none_bool = i_is_subject(feats).endswith("False") and j_is_subject(feats).endswith("False")
+    return "none_is_subject={}".format(none_bool)
 
 def animacy_agreement(feats):
     both_people = feats.entity_type == "PER" and feats.entity_type_ref == "PER"
