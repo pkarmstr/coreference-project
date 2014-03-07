@@ -36334,7 +36334,7 @@ APW20001209.0634.0303.head.coref 25 23 24 GPE all 25 18 19 GPE their no
 APW20001211.0507.0196.head.coref 20 5 6 ORG company 20 6 7 ORG that yes
 APW20001211.0507.0196.head.coref 20 0 1 PER Parkhurst 20 6 7 ORG that no
 APW20001211.0507.0196.head.coref 20 8 11 ORG Road_&_Track 20 6 7 ORG that no
-APW20001211.0507.0196.head.coref 20 13 15 ORG Bond/Parkhurst_Publishing 20 6 7 ORG that no
+APW20001211.0507.0196.head.coref 20 13 15 ORG Bond_Publishing 20 6 7 ORG that no
 APW20001211.0507.0196.head.coref 18 14 16 PER Joe_Rusz 18 19 20 PER editor yes
 APW20001211.0507.0196.head.coref 18 0 1 PER He 18 19 20 PER editor no
 APW20001211.0507.0196.head.coref 18 3 6 ORG Road_&_Track 18 19 20 PER editor no
@@ -36359,7 +36359,7 @@ APW20001211.0507.0196.head.coref 19 22 23 PER Little 20 8 11 ORG Road_&_Track no
 APW20001211.0507.0196.head.coref 20 0 1 PER Parkhurst 20 8 11 ORG Road_&_Track no
 APW20001211.0507.0196.head.coref 20 5 6 ORG company 20 8 11 ORG Road_&_Track no
 APW20001211.0507.0196.head.coref 20 6 7 ORG that 20 8 11 ORG Road_&_Track no
-APW20001211.0507.0196.head.coref 20 13 15 ORG Bond/Parkhurst_Publishing 20 8 11 ORG Road_&_Track no
+APW20001211.0507.0196.head.coref 20 13 15 ORG Bond_Publishing 20 8 11 ORG Road_&_Track no
 APW20001211.0507.0196.head.coref 16 17 19 ORG Carting_World 16 22 23 ORG magazine yes
 APW20001211.0507.0196.head.coref 16 0 1 PER He 16 22 23 ORG magazine no
 APW20001211.0507.0196.head.coref 16 9 10 GPE Europe 16 22 23 ORG magazine no
@@ -36518,12 +36518,12 @@ APW20001211.0507.0196.head.coref 19 22 23 PER Little 20 0 1 PER Parkhurst no
 APW20001211.0507.0196.head.coref 20 5 6 ORG company 20 0 1 PER Parkhurst no
 APW20001211.0507.0196.head.coref 20 6 7 ORG that 20 0 1 PER Parkhurst no
 APW20001211.0507.0196.head.coref 20 8 11 ORG Road_&_Track 20 0 1 PER Parkhurst no
-APW20001211.0507.0196.head.coref 20 13 15 ORG Bond/Parkhurst_Publishing 20 0 1 PER Parkhurst no
+APW20001211.0507.0196.head.coref 20 13 15 ORG Bond_Publishing 20 0 1 PER Parkhurst no
 APW20001211.0507.0196.head.coref 20 0 1 PER Parkhurst 21 0 1 PER He yes
 APW20001211.0507.0196.head.coref 20 5 6 ORG company 21 0 1 PER He no
 APW20001211.0507.0196.head.coref 20 6 7 ORG that 21 0 1 PER He no
 APW20001211.0507.0196.head.coref 20 8 11 ORG Road_&_Track 21 0 1 PER He no
-APW20001211.0507.0196.head.coref 20 13 15 ORG Bond/Parkhurst_Publishing 21 0 1 PER He no
+APW20001211.0507.0196.head.coref 20 13 15 ORG Bond_Publishing 21 0 1 PER He no
 APW20001211.0507.0196.head.coref 21 11 12 PER wife 21 0 1 PER He no
 APW20001211.0507.0196.head.coref 21 0 1 PER He 21 10 11 PER his yes
 APW20001211.0507.0196.head.coref 21 11 12 PER wife 21 10 11 PER his no
@@ -36771,7 +36771,7 @@ APW20001211.0507.0196.head.coref 20 0 1 PER Parkhurst 21 11 12 PER wife no
 APW20001211.0507.0196.head.coref 20 5 6 ORG company 21 11 12 PER wife no
 APW20001211.0507.0196.head.coref 20 6 7 ORG that 21 11 12 PER wife no
 APW20001211.0507.0196.head.coref 20 8 11 ORG Road_&_Track 21 11 12 PER wife no
-APW20001211.0507.0196.head.coref 20 13 15 ORG Bond/Parkhurst_Publishing 21 11 12 PER wife no
+APW20001211.0507.0196.head.coref 20 13 15 ORG Bond_Publishing 21 11 12 PER wife no
 APW20001211.0507.0196.head.coref 21 0 1 PER He 21 11 12 PER wife no
 APW20001211.0507.0196.head.coref 21 10 11 PER his 21 11 12 PER wife no
 APW20001211.0507.0196.head.coref 21 11 12 PER wife 23 4 5 PER wife yes
