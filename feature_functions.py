@@ -6,6 +6,7 @@ from nltk.corpus import wordnet as wn
 from nltk.tree import ParentedTree
 
 
+
 def dem_token(feats):
     """WORKS!"""
     dem_re = re.findall(r"these|this|that|those",feats.j_cleaned) #yes, only j!
@@ -207,7 +208,7 @@ def __is_subject__(curr_tree,token, parent):
     return found
 
     ######FOR PREVIOUS FUNCTION, WITHOUT THE GIVEN PARENT
-    found = False
+    ##found = False
     #for child in curr_tree:
     #    if isinstance(child, ParentedTree):
     #        conditions = token in "_".join(child.leaves()) and curr_tree.node == "NP"
@@ -255,6 +256,35 @@ def animacy_agreement(feats):
     both_people = feats.entity_type == "PER" and feats.entity_type_ref == "PER"
     both_not_people = feats.entity_type != "PER" and feats.entity_type_ref != "PER"
     return "animacy_agreement={}".format(both_people or both_not_people)
+
+def same_max_NP(feats):
+    if feats.sentence !=  feats.sentence_ref:
+        return "same_max_NP={}".format(False)
+    else:
+        sentence_tree = TREES_DICTIONARY[feats.article+".raw"][int(feats.sentence)]
+        ptree = ParentedTree.convert(sentence_tree)
+        parent1 = __get_parent_tree__(feats.token, ptree)
+        parent2 = __get_parent_tree__(feats.token_ref, ptree)
+        max_p_i = __get_max_projection__(ptree,parent1)
+        max_p_j = __get_max_projection__(ptree, parent2)
+        both_NPs = max_p_i.node == "NP" and max_p_j.node == "NP"
+        return "same_max_NP={}".format(max_p_i == max_p_j and both_NPs)
+
+
+
+def __get_max_projection__(bigger_tree,target_tree):
+    max = None
+    for child in bigger_tree:
+        if isinstance(max, ParentedTree):
+            break
+        elif isinstance(child, ParentedTree):
+            if child == target_tree:
+                max = bigger_tree
+            else:
+                max = __get_max_projection__(child,target_tree)
+    return max
+
+
 
 
 
