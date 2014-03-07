@@ -144,7 +144,7 @@ class FeatureTest(unittest.TestCase):
     def test_same_max_NP(self):
         line1 = "NYT20001111.1247.0093.head.coref 24 3 4 PER photographer 24 5 7 PER Yola_Monakhov photographer Yola_Monakhov yes".rstrip().split()
         feats1 = FeatureRow(*line1)
-        print same_max_NP(feats1)
+        self.assertEqual(same_max_NP(feats1).endswith("True"),True)
 
 
 
