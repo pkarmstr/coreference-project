@@ -50,6 +50,13 @@ def pronoun_reader():
             ls.append(line.rstrip())
     return ls
 
+def noncontent_reader():
+    ls = []
+    with open("resources/noncontentwords.txt", "r") as f_in:
+        for line in f_in:
+            ls.append(line.rstrip())
+    return set(ls)
+
 FeatureRow = namedtuple("FeatureRow", ["article", "sentence", "offset_begin",
                                         "offset_end", "entity_type", "token",
                                         "sentence_ref", "offset_begin_ref",
@@ -65,3 +72,4 @@ RAW_DICTIONARY = raw_reader()
 POS_DICTIONARY = pos_reader()
 TREES_DICTIONARY = tree_reader()
 PRONOUN_LIST = pronoun_reader()
+NONCONTENT_SET = noncontent_reader()

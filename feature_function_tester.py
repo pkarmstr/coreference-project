@@ -146,7 +146,21 @@ class FeatureTest(unittest.TestCase):
         feats1 = FeatureRow(*line1)
         self.assertEqual(same_max_NP(feats1).endswith("True"),True)
 
+    def test_def_np(self):
+        line1 = "NYT20001111.1247.0093.head.coref 7 13 14 LOC area 13 5 6 PER they area they no".rstrip().split()
+        line2 = "APW20001110.1844.0453.head.coref 6 7 8 PER witness 4 14 15 PER Jewish witness Jewish no".rstrip().split()
+        fs1 = FeatureRow(*line1)
+        fs2 = FeatureRow(*line2)
+        self.assertEqual(def_np(fs1).endswith("False"),True)
+        self.assertEqual(def_np(fs2).endswith("True"),True)
 
+    def test_def_np_pos_match(self):
+        line1 = "NYT20001111.1247.0093.head.coref 7 13 14 LOC area 13 5 6 PER they area they no".rstrip().split()
+        line2 = "APW20001110.1844.0453.head.coref 20 1 2 PER lawyer 21 11 12 FAC hide-out lawyer hide-out no".rstrip().split()
+        fs1 = FeatureRow(*line1)
+        fs2 = FeatureRow(*line2)
+        self.assertEqual(def_np_pos_match(fs1).endswith("False"),True)
+        self.assertEqual(def_np_pos_match(fs2).endswith("True"),True)
 
 
 
