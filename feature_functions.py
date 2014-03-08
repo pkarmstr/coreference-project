@@ -159,6 +159,9 @@ def apposition(feats): #this was driving me MAD....I SHOULD CORRECT THE STYLE...
 
 #ANYA'S  :)
 def __get_parent_tree__(unclean_token, t):
+    """
+    Given a token, returns the subtree that dominates that token in the corresponding parse tree.
+    """
     words = unclean_token.split('_')
     leaf_indices=[]
     for word in words:
@@ -400,9 +403,7 @@ def j_pronoun(fs):
 
 def string_match(fs):
     """allows full string match or partial string match, both ways"""
-    i_cleaned=re.sub(r'(\W+)(\w)', r'\2', fs.token).lower()
-    j_cleaned=re.sub(r'(\W+)(\w)', r'\2', fs.token_ref).lower()
-    return "string_match={}".format((i_cleaned in j_cleaned) or (j_cleaned in i_cleaned))
+    return "string_match={}".format((fs.i_cleaned in fs.j_cleaned) or (fs.j_cleaned in fs.i_cleaned))
 
 def word_overlap(fs):
     """

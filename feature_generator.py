@@ -40,7 +40,12 @@ class Featurizer:
         return gold_data
 
     def _clean(self, token):
-        return re.sub(r'(\W+)(\w)', r'\2', token).lower()
+        """
+        1) Removes non-alpha (but not the "-") from the beginning of the token
+        2) Removes possessive 's from the end
+        3) Removes O', d', and ;T from anywhere (O'Brien becomes Brien, d'Alessandro becomes Alessandro, etc.)
+        """
+        return re.sub(r'O\'|d\'|;T','',re.sub(r'\'s$','',re.sub(r'[^\w\s.]+$','',re.sub(r'^[^\w\s-]+','',token)))).lower()
 
     def build_features(self):
         self.new_features = []
