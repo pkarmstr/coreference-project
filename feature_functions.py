@@ -171,8 +171,6 @@ def __get_parent_tree__(unclean_token, t):
         elif word=='AMP' and word not in t.leaves():
             word='&AMP'
         elif word not in t.leaves():
-            #print statement for debugging
-            #print t.leaves()
             pass
         leaf_indices.append(t.leaves().index(word))
 
@@ -390,12 +388,10 @@ def i_pos(fs):
 def dist(fs):
     """number of sentences between the markables"""
     distance=int(fs.sentence_ref) - int(fs.sentence)
-    #print fs.sentence,'\t',fs.sentence_ref,'\t',distance,'\n'
     return "dist={}".format(str(distance))
 
 def i_pronoun(fs):
     """the first markable is a pronoun (includes reflexives)"""
-    #print fs.token,'\t',fs.token.split('_')[0] in PRONOUN_LIST,'\n'
     return "i_pronoun={}".format(fs.token.split('_')[0].lower() in PRONOUN_LIST)
 
 def j_pronoun(fs):
@@ -406,7 +402,6 @@ def string_match(fs):
     """allows full string match or partial string match, both ways"""
     i_cleaned=re.sub(r'(\W+)(\w)', r'\2', fs.token).lower()
     j_cleaned=re.sub(r'(\W+)(\w)', r'\2', fs.token_ref).lower()
-    #print i_cleaned,'\t',j_cleaned,'\t',(i_cleaned in j_cleaned) or (j_cleaned in i_cleaned),'\n'
     return "string_match={}".format((i_cleaned in j_cleaned) or (j_cleaned in i_cleaned))
 
 def word_overlap(fs):
@@ -464,15 +459,9 @@ def word_overlap_complete(fs):
     content_words_i=all_words_i.difference(NONCONTENT_SET) #all words minus non-content words
     content_words_j=all_words_j.difference(NONCONTENT_SET)
 
-    print content_words_i
-    print content_words_j
-
     intersection=content_words_i.intersection(content_words_j)
 
     result=(len(content_words_i)==len(content_words_j)) and (len(intersection)==len(content_words_i))
-
-    print intersection
-    print result
 
     return "word_overlap_complete={}".format(result)
 
