@@ -2,7 +2,8 @@ __author__ = 'keelan,julia'
 
 import unittest
 from feature_functions import *
-from feature_functions import __determine_number__, __determine_gender__, __is_subject__, __get_parent_tree__
+from feature_functions import __determine_number__, __determine_gender__, __is_subject__, __get_parent_tree__, \
+    __pos_match__, def_np, def_np_pos_match
 from file_reader import RAW_DICTIONARY, POS_DICTIONARY, TREES_DICTIONARY, PRONOUN_LIST, FeatureRow
 
 class FeatureTest(unittest.TestCase):
@@ -160,9 +161,15 @@ class FeatureTest(unittest.TestCase):
         fs1 = FeatureRow(*line1)
         fs2 = FeatureRow(*line2)
         self.assertEqual(def_np_pos_match(fs1).endswith("False"),True)
-        self.assertEqual(def_np_pos_match(fs2).endswith("True"),True)
+        self.assertEqual(def_np(fs2).endswith("False") and __pos_match__(fs2),True)
 
-
+    def test_word_overlap(self):
+        line1 = "NYT20001111.1247.0093.head.coref 7 13 14 LOC area 13 5 6 PER they area they no".rstrip().split()
+        line2 = "APW20001110.1844.0453.head.coref 20 1 2 PER lawyer 21 11 12 FAC hide-out lawyer hide-out no".rstrip().split()
+        fs1 = FeatureRow(*line1)
+        fs2 = FeatureRow(*line2)
+        self.assertEqual(word_overlap(fs1).endswith("False"),True)
+        self.assertEqual(word_overlap(fs2).endswith("False"),True)
 
 
 

@@ -344,7 +344,7 @@ def _later_markable(fs):
     else:
         print "Error in later_markable(): Something screwy going on with offsets"
 
-def _pos_match(fs):
+def __pos_match__(fs):
     """
     True if both markables have the same part of speech, False otherwise.
     Used in conjunction with def_np feature (and maybe dem_np too?)
@@ -356,7 +356,7 @@ def _pos_match(fs):
     return pos_i==pos_j
 
 def def_np_pos_match(fs):
-    result=((def_np(fs)=='def_np=True') and _pos_match(fs))
+    result=((def_np(fs).endswith("True")) and __pos_match__(fs))
     return "def_np_pos_match={}".format(result)
 
 def def_np(fs):
@@ -413,7 +413,6 @@ def word_overlap(fs):
     """
     True if the intersection between the content words in NP(i) and NP(j) is not empty;
     else False.
-    ***DON'T USE YET: getting an error from get parent tree***
     """
     sent_i=TREES_DICTIONARY[fs.article+".raw"][int(fs.sentence)]
     sent_j=TREES_DICTIONARY[fs.article+".raw"][int(fs.sentence_ref)]
@@ -428,15 +427,54 @@ def word_overlap(fs):
         lowercase_leaves_i[p] = lowercase_leaves_i[p].lower()
 
     for q,word in enumerate(lowercase_leaves_j):
-        lowercase_leaves_i[q] = lowercase_leaves_j[q].lower()
+        lowercase_leaves_j[q] = lowercase_leaves_j[q].lower()
 
     all_words_i = set(lowercase_leaves_i)
     all_words_j = set(lowercase_leaves_j)
+
     content_words_i=all_words_i.difference(NONCONTENT_SET) #all words minus non-content words
     content_words_j=all_words_j.difference(NONCONTENT_SET)
+
     intersection=content_words_i.intersection(content_words_j)
+
     return "word_overlap={}".format(len(intersection)>0)
 
+def word_overlap_complete(fs):
+    """
+    True if all the content words in the two phrases are exactly the same.
+    """
+    sent_i=TREES_DICTIONARY[fs.article+".raw"][int(fs.sentence)]
+    sent_j=TREES_DICTIONARY[fs.article+".raw"][int(fs.sentence_ref)]
+    parent_i = __get_parent_tree__(fs.token,sent_i)
+    parent_j = __get_parent_tree__(fs.token_ref,sent_j)
+
+    #convert everything to lowercase
+    lowercase_leaves_i=parent_i.leaves()
+    lowercase_leaves_j=parent_j.leaves()
+
+    for p,word in enumerate(lowercase_leaves_i):
+        lowercase_leaves_i[p] = lowercase_leaves_i[p].lower()
+
+    for q,word in enumerate(lowercase_leaves_j):
+        lowercase_leaves_j[q] = lowercase_leaves_j[q].lower()
+
+    all_words_i = set(lowercase_leaves_i)
+    all_words_j = set(lowercase_leaves_j)
+
+    content_words_i=all_words_i.difference(NONCONTENT_SET) #all words minus non-content words
+    content_words_j=all_words_j.difference(NONCONTENT_SET)
+
+    print content_words_i
+    print content_words_j
+
+    intersection=content_words_i.intersection(content_words_j)
+
+    result=(len(content_words_i)==len(content_words_j)) and (len(intersection)==len(content_words_i))
+
+    print intersection
+    print result
+
+    return "word_overlap_complete={}".format(result)
 
 
 

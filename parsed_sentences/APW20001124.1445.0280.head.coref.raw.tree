@@ -4,7 +4,7 @@
 
 (S1 (S (NP (NNP Cheney)) (VP (TO To) (VP (VB Be) (VP (VBN Released) (PP (IN From) (NP (NNP Hospital))))))))
 
-(S1 (S (NP (NP (NNP WASHINGTON)) (PRN (-LRB- -LRB-) (NP (NNP AP)) (-RRB- -RRB-)) (NP (NP (JJ Republican) (NN vice) (JJ presidential) (NN candidate)) (NP (NNP Dick) (NNP Cheney))) (, ,) (VP (VBN said) (PP (IN by) (NP (PRP$ his) (NN doctor) (S (VP (TO to) (VP (VB be) (VP (VBG recovering) (ADVP (RB well)) (PP (IN from) (NP (DT a) (JJ mild) (NN heart) (NN attack)))))))))) (, ,)) (VP (VBD was) (VP (VBG being) (VP (VBD released) (PP (IN from) (NP (DT the) (NN hospital)) (NP (NNP Friday)))))) (. .)))
+(S1 (S (NP (NP (NNP WASHINGTON)) (PRN (-LRB- -LRB-) (NP (NNP AP)) (-RRB- -RRB-))) (VP (VBZ _) (NP (NP (JJ Republican) (NN vice) (JJ presidential) (NN candidate)) (SBAR (S (NP (NP (NNP Dick) (NNP Cheney)) (, ,) (VP (VBN said) (PP (IN by) (NP (PRP$ his) (NN doctor) (S (VP (TO to) (VP (VB be) (VP (VBG recovering) (ADVP (RB well)) (PP (IN from) (NP (DT a) (JJ mild) (NN heart) (NN attack)))))))))) (, ,)) (VP (VBD was) (VP (VBG being) (VP (VBD released) (PP (IN from) (NP (DT the) (NN hospital)) (NP (NNP Friday)))))))))) (. .)))
 
 (S1 (SINV (`` ``) (S (NP (PRP He)) (VP (VBZ 's) (VP (VBG going) (ADVP (NN home))))) (, ,) ('' '') (VP (VBD said)) (NP (NAC (NNP Cheney) (NN chief) (PP (IN of) (NP (NN staff)))) (NNP Kathleen) (NNP Shanahan)) (. .)))
 
