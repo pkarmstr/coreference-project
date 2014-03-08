@@ -135,24 +135,27 @@ def apposition(feats): #this was driving me MAD....I SHOULD CORRECT THE STYLE...
     """WORKS WITH THE EXAMPLES IN UNITTEST, HOPE THEY WERE NOT A COINDIDENCE"""
     sentence_tree = TREES_DICTIONARY[feats.article+".raw"][int(feats.sentence_ref)]
     ptree = ParentedTree.convert(sentence_tree)
+    token_ref = set(feats.token_ref.split("_"))
+    token = set(feats.token.split("_"))
     def is_j_apposition(curr_tree):
             found = False
             for child in curr_tree:
-                if isinstance(child, ParentedTree):
-                    conditions = feats.token_ref in "_".join(child.leaves()) and curr_tree.node == "NP"
-                    if conditions:
-                        brother = child.left_sibling()
-                        if isinstance(brother, ParentedTree):
-                            if brother.node == ",":
-                                antecedent = brother.left_sibling()
-                                if isinstance(antecedent,ParentedTree):
-                                    previous_words = antecedent.leaves()
-                                    if feats.token in "_".join(previous_words):
-                                        found = True
-                    else:
-                        found = is_j_apposition(child)
                 if found:
                     break
+                elif isinstance(child, ParentedTree):
+                    child_leaves = set(child.leaves())
+                    conditions = len(token_ref.intersection(child_leaves))>0 and curr_tree.node == "NP"
+                    if conditions:
+                        brother = child.left_sibling()
+                        if isinstance(brother, ParentedTree) and brother.node == ",":
+                            antecedent = brother.left_sibling()
+                            if isinstance(antecedent,ParentedTree):
+                                previous_words = set(antecedent.leaves())
+                                if len(token.intersection(previous_words))>0:
+                                    found = True
+                    else:
+                        found = is_j_apposition(child)
+
             return found
     return "apposition={}".format(is_j_apposition(ptree))
 
