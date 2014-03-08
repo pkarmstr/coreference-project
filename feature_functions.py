@@ -157,7 +157,7 @@ def apposition(feats): #this was driving me MAD....I SHOULD CORRECT THE STYLE...
     return "apposition={}".format(is_j_apposition(ptree))
 
 
-#ANYA'S  :)
+#ANYA'S FUNCTION :)
 def __get_parent_tree__(unclean_token, t):
     words = unclean_token.split('_')
     leaf_indices=[]
@@ -273,16 +273,55 @@ def same_max_NP(feats):
 
 
 def __get_max_projection__(bigger_tree,target_tree):
-    max = None
+    max_p = None
     for child in bigger_tree:
-        if isinstance(max, ParentedTree):
+        if isinstance(max_p, ParentedTree):
             break
         elif isinstance(child, ParentedTree):
             if child == target_tree:
-                max = bigger_tree
+                max_p = bigger_tree
             else:
-                max = __get_max_projection__(child,target_tree)
-    return max
+                max_p = __get_max_projection__(child,target_tree)
+    return max_p
+
+
+
+def is_pred_nominal(feats):
+    if feats.sentence != feats.sentence_ref:
+        return "is_pred_nominal={}".format(False)
+    else:
+        tree = ParentedTree.convert(TREES_DICTIONARY[feats.article+".raw"][int(feats.sentence)])
+        NP_i = __get_parent_tree__(feats.token, tree)
+        NP_j = __get_parent_tree__(feats.token_ref,tree)
+        nominal= __get_max_projection__(tree,NP_j)
+        copula_verbs = set(["is","are","were","was","am"])
+        def check_nominal_construction(tree):
+            found = False
+            for t in tree:
+                if found:
+                    break
+                elif isinstance(t, ParentedTree):
+                    if t == NP_i:
+                        brother = t.right_sibling()
+                        if isinstance(brother,ParentedTree) and brother.node == "VP":
+                            verb = set(brother.leaves()[0:1])
+                            verb_is_copula = len(verb.intersection(copula_verbs))>0
+                            if verb_is_copula:
+                                for subtree in brother:
+                                    if subtree == nominal:
+                                        found = True
+                                        break
+                    else:
+                        found = check_nominal_construction(t)
+            return found
+
+        return "is_pred_nominal={}".format(check_nominal_construction(tree))
+
+
+
+
+
+
 
 
 

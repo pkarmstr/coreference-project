@@ -146,6 +146,16 @@ class FeatureTest(unittest.TestCase):
         feats1 = FeatureRow(*line1)
         self.assertEqual(same_max_NP(feats1).endswith("True"),True)
 
+    def test_predicate_nominal(self):
+        line1 = "NYT20001027.2150.0417.head.coref 22 0 1 GPE Canada 22 2 3 GPE home Canada home yes".rstrip().split()
+        feats1 = FeatureRow(*line1)
+        line2 = "NYT20001111.1247.0093.head.coref 24 3 4 PER photographer 24 5 7 PER Yola_Monakhov photographer Yola_Monakhov yes".rstrip().split()
+        feats2 = FeatureRow(*line2)
+        self.assertEqual(is_pred_nominal(feats1).endswith("True"),True)
+        self.assertEqual(is_pred_nominal(feats2).endswith("False"),True)
+
+
+
 
 
 
