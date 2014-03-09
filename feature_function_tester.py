@@ -2,8 +2,14 @@ __author__ = 'keelan'
 
 import unittest
 from feature_functions import *
+<<<<<<< HEAD
 from feature_functions import __determine_number__, __determine_gender__
 from file_reader import RAW_DICTIONARY, POS_DICTIONARY, TREES_DICTIONARY, PRONOUN_LIST
+=======
+from feature_functions import __determine_number__, __determine_gender__, __is_subject__, __get_parent_tree__, \
+    __pos_match__, def_np, def_np_pos_match
+from file_reader import RAW_DICTIONARY, POS_DICTIONARY, TREES_DICTIONARY, PRONOUN_LIST, FeatureRow
+>>>>>>> julia
 
 class FeatureTest(unittest.TestCase):
 
@@ -17,14 +23,20 @@ class FeatureTest(unittest.TestCase):
         self.assertTrue("they" in PRONOUN_LIST)
 
     ##quick note: in each line i have added manually the corresponding i_cleaned and j_cleaned before the coref-label.
-    def test_dem_np(self):
+    def test_dem_token(self):
         #this line does not exist in the data, but it would be the perfect example for the feature
         line1 = "NYT20001102.1839.0340.head.coref 17 2 3 PER candidates 30 8 9 PER those candidates those no".rstrip().split()
         feats1 = FeatureRow(*line1)
         line2 = "NYT20001111.1247.0093.head.coref 19 5 7 LOC West_Bank 21 32 33 GPE city West_Bank city no".rstrip().split()
         feats2 = FeatureRow(*line2)
+        self.assertEqual(dem_token(feats1).endswith("True"),True)
+        self.assertEquals(dem_token(feats2).endswith("False"),True)
+
+    def dem_np(self):
+        line1 = "NYT20001111.1247.0093.head.coref 7 13 14 LOC area 13 5 6 PER they area they no".rstrip().split()
+        feats1 = FeatureRow(*line1)
         self.assertEqual(dem_np(feats1).endswith("True"),True)
-        self.assertEquals(dem_np(feats2).endswith("False"),True)
+
     def test__determine_number__(self):
         line1 = "NYT20001111.1247.0093.head.coref 13 5 6 PER they 15 12 13 WEA rifles they rifles no".rstrip().split()
         feats1=FeatureRow(*line1)
@@ -80,6 +92,112 @@ class FeatureTest(unittest.TestCase):
         self.assertEqual(alias(feats1).endswith("True"),True)
         self.assertEqual(alias(feats2).endswith("True"),True)
 
+<<<<<<< HEAD
+=======
+    def test_entity_type_agreement(self):
+        line1 = "NYT20001111.1247.0093.head.coref 9 27 29 LOC West_Bank 21 0 1 PER Mohtaseb West_Bank Mohtaseb no".rstrip().split()
+        feats1 = FeatureRow(*line1)
+        line2 = "NYT20001023.2203.0479.head.coref 17 10 11 PER governor 32 15 16 PER Andrew governor Andrew no".rstrip().split()
+        feats2 = FeatureRow(*line2)
+        self.assertEqual(entity_type_agreement(feats1).endswith("False"),True)
+        self.assertEqual(entity_type_agreement(feats2).endswith("True"),True)
+
+    def test_apposition(self):
+        line1 = "NYT20001020.2025.0304.head.coref 26 26 28 PER Mark_Madden 26 29 30 PER manager Mark_Madden manager yes".rstrip().split()
+        feats1 = FeatureRow(*line1)
+        line2 = "NYT20001020.2025.0304.head.coref 31 1 3 PER Howard_Klein 31 6 7 PER broker Howard_Klein broker yes".rstrip().split()
+        feats2 = FeatureRow(*line2)
+        self.assertEqual(apposition(feats1).endswith("True"),True)
+        self.assertEqual(apposition(feats2).endswith("True"),True)
+
+    def test__is_subject__(self):
+        line1 = "NYT20001102.1839.0338.head.coref 9 16 17 PER he 18 7 8 ORG itself he itself no".rstrip().split()
+        feats1 = FeatureRow(*line1)
+        line2 = "NYT20001102.1839.0338.head.coref 12 3 4 PER Levitt 18 7 8 ORG itself Levitt itself no".rstrip().split()
+        feats2 = FeatureRow(*line2)
+        line3 = "NYT20001102.1839.0338.head.coref 20 32 33 PER brokers 32 19 20 PER clients brokers clients no".rstrip().split()
+        feats3 = FeatureRow(*line3)
+        line4 = "NYT20001102.1839.0338.head.coref 20 33 34 PER who 32 19 20 PER clients who clients no".rstrip().split()
+        feats4 = FeatureRow(*line4)
+        tree1_i = ParentedTree.convert(TREES_DICTIONARY[feats1.article+".raw"][int(feats1.sentence)])
+        tree1_j = ParentedTree.convert(TREES_DICTIONARY[feats1.article+".raw"][int(feats1.sentence_ref)])
+        tree2_i = ParentedTree.convert(TREES_DICTIONARY[feats2.article+".raw"][int(feats2.sentence)])
+        tree3_i = ParentedTree.convert(TREES_DICTIONARY[feats3.article+".raw"][int(feats3.sentence)])
+        tree4_i = ParentedTree.convert(TREES_DICTIONARY[feats4.article+".raw"][int(feats4.sentence)])
+        parent1_i = __get_parent_tree__(feats1.token, tree1_i)
+        parent1_j = __get_parent_tree__(feats1.token_ref, tree1_j)
+        parent2_i = __get_parent_tree__(feats2.token, tree2_i)
+        parent3_i = __get_parent_tree__(feats3.token, tree3_i)
+        parent4_i = __get_parent_tree__(feats4.token, tree4_i)
+        self.assertEqual(__is_subject__(tree1_i,feats1.token, parent1_i),True)
+        self.assertEqual(__is_subject__(tree1_j,feats1.token_ref,parent1_j),False)
+        self.assertEqual(__is_subject__(tree2_i,feats2.token, parent2_i),True)
+        self.assertEqual(__is_subject__(tree3_i,feats3.token, parent3_i),False)
+        self.assertEqual(__is_subject__(tree4_i,feats4.token, parent4_i),True)
+
+
+
+    def test_animacy_agreement(self):
+        line1 = "NYT20001111.1247.0093.head.coref 9 27 29 LOC West_Bank 21 0 1 PER Mohtaseb West_Bank Mohtaseb no".rstrip().split()
+        feats1 = FeatureRow(*line1)
+        line2 = "NYT20001020.2025.0304.head.coref 31 1 3 PER Howard_Klein 31 6 7 PER broker Howard_Klein broker yes".rstrip().split()
+        feats2 = FeatureRow(*line2)
+        line3= "NYT20001111.1247.0093.head.coref 13 23 25 GPE Gush_Katif 15 12 13 WEA rifles Gush_Katif rifles no".rstrip().split()
+        feats3 = FeatureRow(*line3)
+        self.assertEqual(animacy_agreement(feats1).endswith("False"),True)
+        self.assertEqual(animacy_agreement(feats2).endswith("True"),True)
+        self.assertEqual(animacy_agreement(feats3).endswith("True"),True)
+
+
+    def test_same_max_NP(self):
+        line1 = "NYT20001111.1247.0093.head.coref 24 3 4 PER photographer 24 5 7 PER Yola_Monakhov photographer Yola_Monakhov yes".rstrip().split()
+        feats1 = FeatureRow(*line1)
+        self.assertEqual(same_max_NP(feats1).endswith("True"),True)
+
+    def test_predicate_nominal(self):
+        line1 = "NYT20001027.2150.0417.head.coref 22 0 1 GPE Canada 22 2 3 GPE home Canada home yes".rstrip().split()
+        feats1 = FeatureRow(*line1)
+        line2 = "NYT20001111.1247.0093.head.coref 24 3 4 PER photographer 24 5 7 PER Yola_Monakhov photographer Yola_Monakhov yes".rstrip().split()
+        feats2 = FeatureRow(*line2)
+        self.assertEqual(is_pred_nominal(feats1).endswith("True"),True)
+        self.assertEqual(is_pred_nominal(feats2).endswith("False"),True)
+
+
+    def test_condition_B_met(self):
+        line1 = "NYT20001102.1839.0340.head.coref 17 7 8 PER him 17 3 4 PER who him who no".rstrip().split()
+        feats1 = FeatureRow(*line1)
+        tree1_i = ParentedTree.convert(TREES_DICTIONARY[feats1.article+".raw"][int(feats1.sentence)])
+        #print condition_B_met(feats1)
+
+
+
+    def test_def_np(self):
+        line1 = "NYT20001111.1247.0093.head.coref 7 13 14 LOC area 13 5 6 PER they area they no".rstrip().split()
+        line2 = "APW20001110.1844.0453.head.coref 6 7 8 PER witness 4 14 15 PER Jewish witness Jewish no".rstrip().split()
+        fs1 = FeatureRow(*line1)
+        fs2 = FeatureRow(*line2)
+        self.assertEqual(def_np(fs1).endswith("False"),True)
+        self.assertEqual(def_np(fs2).endswith("True"),True)
+
+    def test_def_np_pos_match(self):
+        line1 = "NYT20001111.1247.0093.head.coref 7 13 14 LOC area 13 5 6 PER they area they no".rstrip().split()
+        line2 = "APW20001110.1844.0453.head.coref 20 1 2 PER lawyer 21 11 12 FAC hide-out lawyer hide-out no".rstrip().split()
+        fs1 = FeatureRow(*line1)
+        fs2 = FeatureRow(*line2)
+        self.assertEqual(def_np_pos_match(fs1).endswith("False"),True)
+        self.assertEqual(def_np(fs2).endswith("False") and __pos_match__(fs2),True)
+
+    def test_word_overlap(self):
+        line1 = "NYT20001111.1247.0093.head.coref 7 13 14 LOC area 13 5 6 PER they area they no".rstrip().split()
+        line2 = "APW20001110.1844.0453.head.coref 20 1 2 PER lawyer 21 11 12 FAC hide-out lawyer hide-out no".rstrip().split()
+        fs1 = FeatureRow(*line1)
+        fs2 = FeatureRow(*line2)
+        self.assertEqual(word_overlap(fs1).endswith("False"),True)
+        self.assertEqual(word_overlap(fs2).endswith("False"),True)
+
+
+
+>>>>>>> julia
 if __name__ == "__main__":
     unittest.main()
 
