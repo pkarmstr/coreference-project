@@ -2,14 +2,11 @@ __author__ = 'keelan'
 
 import unittest
 from feature_functions import *
-<<<<<<< HEAD
 from feature_functions import __determine_number__, __determine_gender__
 from file_reader import RAW_DICTIONARY, POS_DICTIONARY, TREES_DICTIONARY, PRONOUN_LIST
-=======
 from feature_functions import __determine_number__, __determine_gender__, __is_subject__, __get_parent_tree__, \
     __pos_match__, def_np, def_np_pos_match
 from file_reader import RAW_DICTIONARY, POS_DICTIONARY, TREES_DICTIONARY, PRONOUN_LIST, FeatureRow
->>>>>>> julia
 
 class FeatureTest(unittest.TestCase):
 
@@ -92,8 +89,6 @@ class FeatureTest(unittest.TestCase):
         self.assertEqual(alias(feats1).endswith("True"),True)
         self.assertEqual(alias(feats2).endswith("True"),True)
 
-<<<<<<< HEAD
-=======
     def test_entity_type_agreement(self):
         line1 = "NYT20001111.1247.0093.head.coref 9 27 29 LOC West_Bank 21 0 1 PER Mohtaseb West_Bank Mohtaseb no".rstrip().split()
         feats1 = FeatureRow(*line1)
@@ -197,7 +192,6 @@ class FeatureTest(unittest.TestCase):
 
 
 
->>>>>>> julia
 if __name__ == "__main__":
     unittest.main()
 

@@ -3,9 +3,7 @@
 from file_reader import TREES_DICTIONARY, POS_DICTIONARY, RAW_DICTIONARY, PRONOUN_LIST, NONCONTENT_SET, FeatureRow
 import re, os, nltk
 from nltk.corpus import names
-<<<<<<< HEAD
 from collections import namedtuple
-=======
 from nltk.corpus import wordnet as wn
 from nltk.tree import ParentedTree
 
@@ -51,12 +49,10 @@ def def_np(fs):
         Its possible values are true or false. In our definition, a definite noun phrase is a noun phrase that
         starts with the word the. For example, the car is a definite noun phrase. If j is a definite noun phrase,
         return true; else return false."""
->>>>>>> julia
 
     #figure out which mention is the later one
     later_mention = _later_markable(fs)
 
-<<<<<<< HEAD
 ##################
 # basic features #
 ##################
@@ -81,7 +77,6 @@ def entity_type_ref(fr):
 #################
 
 def dem_np(feats):
-=======
     # get the tree that dominates the later mention
     if later_mention=='i':
         sent_tree=TREES_DICTIONARY[fs.article+".raw"][int(fs.sentence)]
@@ -185,7 +180,6 @@ def word_overlap_complete(fs):
 ################
 
 def dem_token(feats):
->>>>>>> julia
     """WORKS!"""
     dem_re = re.findall(r"these|this|that|those",feats.j_cleaned) #yes, only j!
     return "dem_token={}".format(len(dem_re) > 0)
@@ -300,7 +294,6 @@ def alias(feats):
     return "alias={}".format(alias)
 
 
-<<<<<<< HEAD
 def apposition(feats):
     pass #TODO
 
@@ -354,7 +347,6 @@ def string_match(fs):
     j_cleaned=re.sub(r'(\W+)(\w)', r'\2', fs.token_ref).lower()
     #print i_cleaned,'\t',j_cleaned,'\t',(i_cleaned in j_cleaned) or (j_cleaned in i_cleaned),'\n'
     return "string_match={}".format((i_cleaned in j_cleaned) or (j_cleaned in i_cleaned))
-=======
 def entity_type_agreement(feats):
     ##intuition similar to sem_class agreement (not implemented)
     """WORKS"""
@@ -602,4 +594,3 @@ def span(feats):
     #            if found:
     #                break
     #    return found
->>>>>>> julia
