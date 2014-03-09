@@ -6,7 +6,7 @@ dem_np
 def_np
 number_agreement
 gender_agreement
-both_proper_names
+both_proper_name
 apposition
 alias
 entity_type_agreement
