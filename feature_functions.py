@@ -12,153 +12,7 @@ def is_coreferent(fs):
     return fs.is_referent
 
 
-################
-# Anya's stuff #
-################
 
-def _later_markable(fs):
-    """
-    Tells you which token in a coref pair occurs later in the text.
-    Returns 'i' if it's the first one, and 'j' if it's the second one.
-    """
-
-    if int(fs.sentence) > int(fs.sentence_ref):
-        return 'i'
-    elif int(fs.sentence) < int(fs.sentence_ref):
-        return 'j'
-    elif int(fs.sentence)==int(fs.sentence_ref):
-        if int(fs.offset_begin) > int(fs.offset_begin_ref):
-            return 'i'
-        elif int(fs.offset_begin) < int(fs.offset_begin_ref):
-            return 'j'
-    else:
-        print "Error in later_markable(): Something screwy going on with offsets"
-
-def __pos_match__(fs):
-    """
-    True if both markables have the same part of speech, False otherwise.
-    Used in conjunction with def_np feature (and maybe dem_np too?)
-    """
-
-    pos_i = __get_pos__(fs.article,fs.sentence,fs.offset_begin,fs.offset_end)
-    pos_j = __get_pos__(fs.article,fs.sentence_ref,fs.offset_begin_ref,fs.offset_end_ref)
-
-    return pos_i==pos_j
-
-def def_np_pos_match(fs):
-    result=((def_np(fs).endswith("True")) and __pos_match__(fs))
-    return "def_np_pos_match={}".format(result)
-
-def def_np(fs):
-    """applies only to j (the second markable; this probably means the LATER one, not the right-hand side one)
-        Its possible values are true or false. In our definition, a definite noun phrase is a noun phrase that
-        starts with the word the. For example, the car is a definite noun phrase. If j is a definite noun phrase,
-        return true; else return false."""
-
-    #figure out which mention is the later one
-    later_mention = _later_markable(fs)
-
-    # get the tree that dominates the later mention
-    if later_mention=='i':
-        sent_tree=TREES_DICTIONARY[fs.article+".raw"][int(fs.sentence)]
-        parent_tree=__get_parent_tree__(fs.token, sent_tree)
-    elif later_mention=='j':
-        sent_tree=TREES_DICTIONARY[fs.article+".raw"][int(fs.sentence_ref)]
-        parent_tree=__get_parent_tree__(fs.token_ref, sent_tree)
-
-    # see if that parent tree is an NP that starts with "the" and return true if it does
-    return "def_np={}".format(parent_tree.node=='NP' and parent_tree.leaves()[0].lower()=='the')
-
-def i_pos(fs):
-    """written for practice, don't have to use"""
-    sent_num=fs.sentence
-    start_index=fs.offset_begin
-    end_index=fs.offset_end
-    fname=fs.article+".raw"
-    return "i_pos={}".format(__get_pos__(fname,sent_num,start_index,end_index))
-
-def dist(fs):
-    """number of sentences between the markables"""
-    distance=int(fs.sentence_ref) - int(fs.sentence)
-    return "dist={}".format(str(distance))
-
-def i_pronoun(fs):
-    """the first markable is a pronoun (includes reflexives)"""
-    return "i_pronoun={}".format(fs.token.split('_')[0].lower() in PRONOUN_LIST)
-
-def j_pronoun(fs):
-    """the second markable is a pronoun (includes reflexives)"""
-    return "j_pronoun={}".format(fs.token_ref.split('_')[0].lower() in PRONOUN_LIST)
-
-def string_match(fs):
-    """allows full string match or partial string match, both ways"""
-    return "string_match={}".format((fs.i_cleaned in fs.j_cleaned) or (fs.j_cleaned in fs.i_cleaned))
-
-def word_overlap(fs):
-    """
-    True if the intersection between the content words in NP(i) and NP(j) is not empty;
-    else False.
-    """
-    sent_i=TREES_DICTIONARY[fs.article+".raw"][int(fs.sentence)]
-    sent_j=TREES_DICTIONARY[fs.article+".raw"][int(fs.sentence_ref)]
-    parent_i = __get_parent_tree__(fs.token,sent_i)
-    parent_j = __get_parent_tree__(fs.token_ref,sent_j)
-
-    #convert everything to lowercase
-    lowercase_leaves_i=parent_i.leaves()
-    lowercase_leaves_j=parent_j.leaves()
-
-    for p,word in enumerate(lowercase_leaves_i):
-        lowercase_leaves_i[p] = lowercase_leaves_i[p].lower()
-
-    for q,word in enumerate(lowercase_leaves_j):
-        lowercase_leaves_j[q] = lowercase_leaves_j[q].lower()
-
-    all_words_i = set(lowercase_leaves_i)
-    all_words_j = set(lowercase_leaves_j)
-
-    content_words_i=all_words_i.difference(NONCONTENT_SET) #all words minus non-content words
-    content_words_j=all_words_j.difference(NONCONTENT_SET)
-
-    intersection=content_words_i.intersection(content_words_j)
-
-    return "word_overlap={}".format(len(intersection)>0)
-
-def word_overlap_complete(fs):
-    """
-    True if all the content words in the two phrases are exactly the same.
-    """
-    sent_i=TREES_DICTIONARY[fs.article+".raw"][int(fs.sentence)]
-    sent_j=TREES_DICTIONARY[fs.article+".raw"][int(fs.sentence_ref)]
-    parent_i = __get_parent_tree__(fs.token,sent_i)
-    parent_j = __get_parent_tree__(fs.token_ref,sent_j)
-
-    #convert everything to lowercase
-    lowercase_leaves_i=parent_i.leaves()
-    lowercase_leaves_j=parent_j.leaves()
-
-    for p,word in enumerate(lowercase_leaves_i):
-        lowercase_leaves_i[p] = lowercase_leaves_i[p].lower()
-
-    for q,word in enumerate(lowercase_leaves_j):
-        lowercase_leaves_j[q] = lowercase_leaves_j[q].lower()
-
-    all_words_i = set(lowercase_leaves_i)
-    all_words_j = set(lowercase_leaves_j)
-
-    content_words_i=all_words_i.difference(NONCONTENT_SET) #all words minus non-content words
-    content_words_j=all_words_j.difference(NONCONTENT_SET)
-
-    intersection=content_words_i.intersection(content_words_j)
-
-    result=(len(content_words_i)==len(content_words_j)) and (len(intersection)==len(content_words_i))
-
-    return "word_overlap_complete={}".format(result)
-
-
-################
-# Julia's stuff #
-################
 
 def dem_token(feats):
     """WORKS!"""
@@ -522,3 +376,315 @@ def span(feats):
     #            if found:
     #                break
     #    return found
+
+
+
+
+################
+# Anya's stuff #
+################
+
+def _later_markable(fs):
+    """
+    Tells you which token in a coref pair occurs later in the text.
+    Returns 'i' if it's the first one, and 'j' if it's the second one.
+    """
+
+    if int(fs.sentence) > int(fs.sentence_ref):
+        return 'i'
+    elif int(fs.sentence) < int(fs.sentence_ref):
+        return 'j'
+    elif int(fs.sentence)==int(fs.sentence_ref):
+        if int(fs.offset_begin) > int(fs.offset_begin_ref):
+            return 'i'
+        elif int(fs.offset_begin) < int(fs.offset_begin_ref):
+            return 'j'
+    else:
+        print "Error in later_markable(): Something screwy going on with offsets"
+
+def __pos_match__(fs):
+    """
+    True if both markables have the same part of speech, False otherwise.
+    Used in conjunction with def_np feature (and maybe dem_np too?)
+    """
+
+    pos_i = __get_pos__(fs.article,fs.sentence,fs.offset_begin,fs.offset_end)
+    pos_j = __get_pos__(fs.article,fs.sentence_ref,fs.offset_begin_ref,fs.offset_end_ref)
+
+    return pos_i==pos_j
+
+def def_np_pos_match(fs):
+    result=((def_np(fs).endswith("True")) and __pos_match__(fs))
+    return "def_np_pos_match={}".format(result)
+
+def def_np(fs):
+    """
+    applies only to the second markable; this probably means the LATER one, not the right-hand side one)
+    Its possible values are true or false. In our definition, a definite noun phrase is a noun phrase that
+    starts with the word the. For example, the car is a definite noun phrase. If j is a definite noun phrase,
+    return true; else return false.
+    """
+
+    #figure out which mention is the later one
+    later_mention = _later_markable(fs)
+
+    # get the tree that dominates the later mention
+    if later_mention=='i':
+        sent_tree=TREES_DICTIONARY[fs.article+".raw"][int(fs.sentence)]
+        parent_tree=__get_parent_tree__(fs.token, sent_tree)
+    elif later_mention=='j':
+        sent_tree=TREES_DICTIONARY[fs.article+".raw"][int(fs.sentence_ref)]
+        parent_tree=__get_parent_tree__(fs.token_ref, sent_tree)
+
+    # see if that parent tree is an NP that starts with "the" and return true if it does
+    return "def_np={}".format(parent_tree.node=='NP' and parent_tree.leaves()[0].lower()=='the')
+
+def i_pos(fs):
+    """written for practice, don't have to use"""
+    sent_num=fs.sentence
+    start_index=fs.offset_begin
+    end_index=fs.offset_end
+    fname=fs.article+".raw"
+    return "i_pos={}".format(__get_pos__(fname,sent_num,start_index,end_index))
+
+def dist(fs):
+    """number of sentences between the markables"""
+    distance=int(fs.sentence_ref) - int(fs.sentence)
+    return "dist={}".format(str(distance))
+
+def i_pronoun(fs):
+    """the first markable is a pronoun (includes reflexives)"""
+    return "i_pronoun={}".format(fs.token.split('_')[0].lower() in PRONOUN_LIST)
+
+def j_pronoun(fs):
+    """the second markable is a pronoun (includes reflexives)"""
+    return "j_pronoun={}".format(fs.token_ref.split('_')[0].lower() in PRONOUN_LIST)
+
+def string_match(fs):
+    """allows full string match or partial string match, both ways"""
+    return "string_match={}".format((fs.i_cleaned in fs.j_cleaned) or (fs.j_cleaned in fs.i_cleaned))
+
+def word_overlap(fs):
+    """
+    True if the intersection between the content words in NP(i) and NP(j) is not empty;
+    else False.
+    """
+    sent_i=TREES_DICTIONARY[fs.article+".raw"][int(fs.sentence)]
+    sent_j=TREES_DICTIONARY[fs.article+".raw"][int(fs.sentence_ref)]
+    parent_i = __get_parent_tree__(fs.token,sent_i)
+    parent_j = __get_parent_tree__(fs.token_ref,sent_j)
+
+    #convert everything to lowercase
+    lowercase_leaves_i=parent_i.leaves()
+    lowercase_leaves_j=parent_j.leaves()
+
+    for p,word in enumerate(lowercase_leaves_i):
+        lowercase_leaves_i[p] = lowercase_leaves_i[p].lower()
+
+    for q,word in enumerate(lowercase_leaves_j):
+        lowercase_leaves_j[q] = lowercase_leaves_j[q].lower()
+
+    all_words_i = set(lowercase_leaves_i)
+    all_words_j = set(lowercase_leaves_j)
+
+    content_words_i=all_words_i.difference(NONCONTENT_SET) #all words minus non-content words
+    content_words_j=all_words_j.difference(NONCONTENT_SET)
+
+    intersection=content_words_i.intersection(content_words_j)
+
+    return "word_overlap={}".format(len(intersection)>0)
+
+def word_overlap_complete(fs):
+    """
+    True if all the content words in the two phrases are exactly the same.
+    """
+    sent_i=TREES_DICTIONARY[fs.article+".raw"][int(fs.sentence)]
+    sent_j=TREES_DICTIONARY[fs.article+".raw"][int(fs.sentence_ref)]
+    parent_i = __get_parent_tree__(fs.token,sent_i)
+    parent_j = __get_parent_tree__(fs.token_ref,sent_j)
+
+    #convert everything to lowercase
+    lowercase_leaves_i=parent_i.leaves()
+    lowercase_leaves_j=parent_j.leaves()
+
+    for p,word in enumerate(lowercase_leaves_i):
+        lowercase_leaves_i[p] = lowercase_leaves_i[p].lower()
+
+    for q,word in enumerate(lowercase_leaves_j):
+        lowercase_leaves_j[q] = lowercase_leaves_j[q].lower()
+
+    all_words_i = set(lowercase_leaves_i)
+    all_words_j = set(lowercase_leaves_j)
+
+    content_words_i=all_words_i.difference(NONCONTENT_SET) #all words minus non-content words
+    content_words_j=all_words_j.difference(NONCONTENT_SET)
+
+    intersection=content_words_i.intersection(content_words_j)
+
+    result=(len(content_words_i)==len(content_words_j)) and (len(intersection)==len(content_words_i))
+
+    return "word_overlap_complete={}".format(result)
+
+def modifier(fs):
+    """
+    C if the prenominal modifiers of one NP are a subset of the prenominal modifiers of the other; else I.
+    Anya assumptions:
+    - for this function to return true, both tokens have to be nouns
+    - a noun's prenominal modifier is _any_ word that precedes it in that NP
+    """
+    result=False
+
+    i_pos = __get_pos__(fs.article, fs.sentence, fs.offset_begin, fs.offset_end)
+    j_pos = __get_pos__(fs.article, fs.sentence_ref, fs.offset_begin_ref, fs.offset_end_ref)
+
+    if i_pos.startswith('NN') and j_pos.startswith('NN'):
+        #identify the parent tree (=NP)
+        parent_i = __get_parent_tree__(fs.token,TREES_DICTIONARY[fs.article+".raw"][int(fs.sentence)])
+        parent_j = __get_parent_tree__(fs.token_ref,TREES_DICTIONARY[fs.article+".raw"][int(fs.sentence_ref)])
+
+        #clean up the tokens so we can find them in the tree (same operations as in get parent tree)
+        i_treecleaned=fs.token.split('_')[0]
+        i_treecleaned=re.sub(r'O\'|d\'|;T','',re.sub(r'\'s$','',re.sub(r'[^\w\s.]+$','',re.sub(r'^[^\w\s-]+','',i_treecleaned))))
+        i_treecleaned=re.sub(r'Bond/|/ABC','',i_treecleaned)
+        if i_treecleaned=='':
+            i_treecleaned='&'
+        elif i_treecleaned=='AMP' and i_treecleaned not in parent_i.leaves():
+            i_treecleaned='&AMP'
+        elif i_treecleaned not in parent_i.leaves():
+            i_treecleaned=parent_i.leaves()[0]  #this a way to return False if we can't find the word in the tree
+
+        j_treecleaned=fs.token_ref.split('_')[0]
+        j_treecleaned=re.sub(r'O\'|d\'|;T','',re.sub(r'\'s$','',re.sub(r'[^\w\s.]+$','',re.sub(r'^[^\w\s-]+','',j_treecleaned))))
+        j_treecleaned=re.sub(r'Bond/|/ABC','',j_treecleaned)
+        if j_treecleaned=='':
+            j_treecleaned='&'
+        elif j_treecleaned=='AMP' and j_treecleaned not in parent_j.leaves():
+            j_treecleaned='&AMP'
+        elif j_treecleaned not in parent_j.leaves():
+            j_treecleaned=parent_j.leaves()[0]  #this a way to return False if we can't find the word in the tree
+
+        if i_treecleaned != parent_i.leaves()[0] and j_treecleaned != parent_j.leaves()[0]:
+
+            #convert everything to lowercase
+            lowercase_leaves_i=parent_i.leaves()
+            lowercase_leaves_j=parent_j.leaves()
+
+            for p,word in enumerate(lowercase_leaves_i):
+                lowercase_leaves_i[p] = lowercase_leaves_i[p].lower()
+
+            for q,word in enumerate(lowercase_leaves_j):
+                lowercase_leaves_j[q] = lowercase_leaves_j[q].lower()
+
+            #look at all the words that precede i and j and see if one is a subset of the other
+            leaves_i_before_token = set(lowercase_leaves_i[:lowercase_leaves_i.index(i_treecleaned.lower())]).difference(NONCONTENT_SET)
+            leaves_j_before_token = set(lowercase_leaves_j[:lowercase_leaves_j.index(j_treecleaned.lower())]).difference(NONCONTENT_SET)
+            if len(leaves_i_before_token)>0 and len(leaves_j_before_token)>0: #nec. b/c empty subset is a subset of any set
+                if leaves_i_before_token.issubset(leaves_j_before_token) or \
+                        leaves_j_before_token.issubset(leaves_i_before_token):
+                    result=True
+
+    return "modifier={}".format(result)
+
+def pn_substr(fs):
+    """
+    C if both NPs are proper names and one NP is a proper substring (w.r.t. content words
+    only) of the other; else I.
+    """
+    result=False
+
+    i_pos=__get_pos__(fs.article,fs.sentence,fs.offset_begin,fs.offset_end)
+    j_pos=__get_pos__(fs.article,fs.sentence_ref,fs.offset_begin_ref,fs.offset_end_ref)
+
+    if i_pos=='NNP' and j_pos=='NNP':
+        if word_overlap(fs).endswith('True'):
+            result=True
+
+    return "pn_substr={}".format(result)
+
+def words_substr(fs):
+    """
+    C if both NPs are non-pronominal and one NP is a proper substring (w.r.t. content words
+    only) of the other; else I.
+    """
+    result=False
+
+    i_pos=__get_pos__(fs.article,fs.sentence,fs.offset_begin,fs.offset_end)
+    j_pos=__get_pos__(fs.article,fs.sentence_ref,fs.offset_begin_ref,fs.offset_end_ref)
+
+    if not i_pos.startswith('PRP') and not j_pos.startswith('PRP'):
+        if word_overlap(fs).endswith('True'):
+            result=True
+
+    print fs.token, '\t', fs.token_ref
+    print result
+    print
+
+    return "words_substr={}".format(result)
+
+def both_definites(fs):
+    """
+    C if both NPs start with "the." Same as def_np, except it applies to both markables.
+    """
+
+    parent_i = __get_parent_tree__(fs.token,TREES_DICTIONARY[fs.article+".raw"][int(fs.sentence)])
+    parent_j = __get_parent_tree__(fs.token_ref,TREES_DICTIONARY[fs.article+".raw"][int(fs.sentence_ref)])
+
+    i_def=parent_i.node=='NP' and parent_i.leaves()[0].lower()=='the'
+    j_def=parent_j.node=='NP' and parent_j.leaves()[0].lower()=='the'
+
+    return "both_definites={}".format(i_def and j_def)
+
+def both_embedded(fs):
+    """
+    C if both NPs are prenominal modifiers.
+    Approach:
+        - find the token in its parent tree
+        - get the list of tokens that occur after it in that tree
+        - if for both i and j that list contains a noun, return True
+    """
+    i_embedded=False
+    j_embedded=False
+
+    sent_i=POS_DICTIONARY[fs.article +".raw"][int(fs.sentence)]
+    sent_j=POS_DICTIONARY[fs.article +".raw"][int(fs.sentence_ref)]
+
+    #see if there is a noun within 2 words after i
+    p=int(fs.offset_end)
+
+    while p<int(fs.offset_end)+2 and p<len(sent_i) and i_embedded==False:
+
+        if sent_i[p][-1].startswith('NN'):
+            i_embedded=True
+        p+=1
+
+    #see if there is a noun within 2 words after j
+    q=int(fs.offset_end_ref)
+
+    while q<int(fs.offset_end_ref)+2 and q<len(sent_j) and j_embedded==False:
+
+        if sent_j[q][-1].startswith('NN'):
+            j_embedded=True
+        q+=1
+
+    return "both_embedded={}".format(i_embedded and j_embedded)
+
+def both_pronouns(fs):
+    """C if both markables are pronouns"""
+    i_pos=__get_pos__(fs.article,fs.sentence,fs.offset_begin,fs.offset_end)
+    j_pos=__get_pos__(fs.article,fs.sentence_ref,fs.offset_begin_ref,fs.offset_end_ref)
+    return "both_pronouns={}".format(i_pos.startswith('PRP') and j_pos.startswith('PRP'))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
