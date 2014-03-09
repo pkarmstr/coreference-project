@@ -20,6 +20,11 @@ class Cleaner:
         self.original_data = self.open_gold_data(input_file)
         self.tokenized = self.open_tokenization(tokenized)
         self.basedir = basedir
+        self.log = []
+
+    def write_log(self):
+        with open("cleaning_log.txt", "w") as f_out:
+            f_out.write("\n".join(self.log))
 
     def open_and_parse_xml_file(self, file_name):
         with open(file_name, "r") as f_in:
@@ -59,7 +64,7 @@ class Cleaner:
         with open(f, "r") as f_in:
             for line in f_in:
                 line = line.rstrip().split("|")
-                tokenized.append((line[0].split(), line[1].split()))
+                tokenized.append((line[0].strip().split(), line[1].strip().split()))
         return tokenized
 
     def get_correct_offset(self, tokenized, sentence, offset_begin, offset_end):
@@ -71,7 +76,7 @@ class Cleaner:
         while tokenized != sentence[offset_begin:offset_end]:
             offset_begin += 1
             offset_end += 1
-            if offset_end >= len(sentence):
+            if offset_end > len(sentence):
                 #raise IndexError("{:d} invalid index, token={:s}".format(offset_end, tokenized))
                 self.bad_rows += 1
                 return (-1, -1)
@@ -92,14 +97,14 @@ class Cleaner:
                 self.update_cache(fr.article)
                 nlp_data = self.data_dict[fr.article]
 
-            referent_tmp = (fr.token_ref, fr.sentence_ref)
+            referent_tmp = [fr.token_ref, fr.sentence_ref]
             if referent_tmp != referent_cache:
                 sentence_ref = nlp_data["sentences"][int(fr.sentence_ref)]["text"]
                 tokenized_referent = self.tokenized[i][1]
                 begin_ref, end_ref = self.get_correct_offset(tokenized_referent,
                                                       sentence_ref,
-                                                      int(fr.offset_begin_ref),
-                                                      int(fr.offset_end_ref)
+                                                      int(fr.offset_begin_ref)-1,
+                                                      int(fr.offset_end_ref)-1
                 )
                 ref_offset = [tokenized_referent, begin_ref, end_ref]
                 referent_cache = referent_tmp
@@ -108,10 +113,17 @@ class Cleaner:
             sentence = nlp_data["sentences"][int(fr.sentence)]["text"]
             offset_begin, offset_end = self.get_correct_offset(tokenized,
                                                                sentence,
-                                                               int(fr.offset_begin),
-                                                               int(fr.offset_end)
+                                                               int(fr.offset_begin)-1,
+                                                               int(fr.offset_end)-1
             )
             if offset_begin == -1 or ref_offset[1] == -1:
+                if offset_begin == -1:
+                    self.log.append("word: {:s} | offset: ({}, {}) | sentence: {:s}".format(
+                        tokenized, fr.offset_begin, fr.offset_end, sentence))
+                else:
+                    self.log.append("word: {:s} | offset: ({}, {}) | sentence: {:s}".format(
+                        ref_offset[0], fr.offset_begin_ref, fr.offset_end_ref, sentence_ref))
+
                 continue
             new_row = " ".join([fr.article, fr.sentence, str(offset_begin), str(offset_end),
                                 fr.entity_type, "_".join(tokenized), fr.sentence_ref,
@@ -119,7 +131,8 @@ class Cleaner:
                                 "_".join(ref_offset[0]), fr.is_referent])
             all_new.append(new_row)
         print "{:d} out of {:d} rows didn't have a match".format(self.bad_rows, self.total_rows)
-        return new_row
+        self.write_log()
+        return all_new
 
     def write_new(self, file_name, data):
         with open(file_name, "w") as f_out:
