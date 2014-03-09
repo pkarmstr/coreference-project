@@ -443,7 +443,7 @@ def is_pred_nominal(feats):
         NP_i = __get_parent_tree__(feats.token, s_tree)
         NP_j = __get_parent_tree__(feats.token_ref,s_tree)
         nominal= __get_max_projection__(s_tree,NP_j)
-        copula_verbs = set(["is","are","were","was","am"])
+        copula_verbs = ["is","are","were","was","am"]
         def check_nominal_construction(tree):
             found = False
             for t in tree:
@@ -453,9 +453,8 @@ def is_pred_nominal(feats):
                     if t == NP_i:
                         brother = t.right_sibling()
                         if isinstance(brother,ParentedTree) and brother.node == "VP":
-                            verb = set(brother.leaves()[0:1])
-                            verb_is_copula = len(verb.intersection(copula_verbs))>0
-                            if verb_is_copula:
+                            verb = brother.leaves()[0]
+                            if verb in copula_verbs:
                                 for subtree in brother:
                                     if subtree == nominal:
                                         found = True
