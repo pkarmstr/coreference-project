@@ -9,7 +9,7 @@ from nltk.tree import ParentedTree
 ###############
 
 def is_coreferent(fs):
-    return fs.is_coreferent
+    return fs.is_referent
 
 
 ################
