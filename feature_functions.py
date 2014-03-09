@@ -488,24 +488,6 @@ def span(feats):
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     #OTHER VERSION, DIDN'T REMOVE IT JUST IN CASE
     #def is_j_apposition(curr_tree):
     #    found = False
@@ -532,29 +514,3 @@ def span(feats):
     #            if found:
     #                break
     #    return found
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -2,7 +2,8 @@ __author__ = 'keelan,julia'
 
 import unittest
 from feature_functions import *
-from feature_functions import __determine_number__, __determine_gender__, __is_subject__, __get_parent_tree__
+from feature_functions import __determine_number__, __determine_gender__, __is_subject__, __get_parent_tree__, \
+    __pos_match__, def_np, def_np_pos_match
 from file_reader import RAW_DICTIONARY, POS_DICTIONARY, TREES_DICTIONARY, PRONOUN_LIST, FeatureRow
 
 class FeatureTest(unittest.TestCase):
@@ -159,7 +160,7 @@ class FeatureTest(unittest.TestCase):
         line1 = "NYT20001102.1839.0340.head.coref 17 7 8 PER him 17 3 4 PER who him who no".rstrip().split()
         feats1 = FeatureRow(*line1)
         tree1_i = ParentedTree.convert(TREES_DICTIONARY[feats1.article+".raw"][int(feats1.sentence)])
-        print condition_B_met(feats1)
+        #print condition_B_met(feats1)
 
 
 
