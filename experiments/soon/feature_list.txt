@@ -3,8 +3,11 @@ i_pronoun
 j_pronoun
 string_match
 dem_np
+def_np
 number_agreement
 gender_agreement
+semantic_class?
+both_proper_names
 apposition
 alias
 entity_type_agreement
