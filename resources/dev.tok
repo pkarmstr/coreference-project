@@ -35458,6 +35458,7 @@ Buchanan | candidates
 Gore | candidates
 Bush | candidates
 New York Times | candidates
+/ CBS News | candidates
 Buchanan | candidates
 Florida | candidates
 He | candidates
@@ -35569,6 +35570,7 @@ Buchanan | here
 Gore | here
 Bush | here
 New York Times | here
+/ CBS News | here
 Buchanan | here
 Florida | here
 He | here
@@ -35635,6 +35637,7 @@ Buchanan | Florida
 Gore | Florida
 Bush | Florida
 New York Times | Florida
+/ CBS News | Florida
 Buchanan | Florida
 Florida | Florida
 TALLAHASSEE | Florida
@@ -35668,6 +35671,7 @@ Buchanan | Florida
 Gore | Florida
 Bush | Florida
 New York Times | Florida
+/ CBS News | Florida
 Buchanan | Florida
 He | Florida
 anywhere | Florida
@@ -35732,6 +35736,7 @@ Buchanan | who
 Gore | who
 Bush | who
 New York Times | who
+/ CBS News | who
 Buchanan | who
 Florida | who
 He | who
@@ -35783,6 +35788,7 @@ Buchanan | Democrats
 Gore | Democrats
 Bush | Democrats
 New York Times | Democrats
+/ CBS News | Democrats
 Buchanan | Democrats
 Florida | Democrats
 He | Democrats
@@ -35840,6 +35846,7 @@ Buchanan | who
 Gore | who
 Bush | who
 New York Times | who
+/ CBS News | who
 Buchanan | who
 Florida | who
 He | who
@@ -35897,6 +35904,7 @@ Buchanan | they
 Gore | they
 Bush | they
 New York Times | they
+/ CBS News | they
 Buchanan | they
 Florida | they
 He | they
@@ -35954,6 +35962,7 @@ Buchanan | their
 Gore | their
 Bush | their
 New York Times | their
+/ CBS News | their
 Buchanan | their
 Florida | their
 He | their
@@ -36011,6 +36020,7 @@ Buchanan | Republicans
 Gore | Republicans
 Bush | Republicans
 New York Times | Republicans
+/ CBS News | Republicans
 Buchanan | Republicans
 Florida | Republicans
 He | Republicans
@@ -36102,6 +36112,7 @@ Buchanan | Reform Party
 Gore | Reform Party
 Bush | Reform Party
 New York Times | Reform Party
+/ CBS News | Reform Party
 Buchanan | Reform Party
 Florida | Reform Party
 He | Reform Party
@@ -36187,6 +36198,7 @@ Buchanan | you
 Gore | you
 Bush | you
 New York Times | you
+/ CBS News | you
 Buchanan | you
 Florida | you
 He | you
@@ -36276,98 +36288,7 @@ Buchanan | you
 Gore | you
 Bush | you
 New York Times | you
-Buchanan | you
-Florida | you
-He | you
-anywhere | you
-country | you
-here | you
-Buchanan | you
-he | you
-his | you
-Republicans | you
-conservatives | you
-he | you
-Al Gore | you
-Many | you
-those | you
-who | you
-him | you
-Buchanan | you
-he | you
-Others | you
-he | you
-Republicans | you
-others | you
-Democrats | you
-who | you
-his | you
-they | you
-their | you
-Bush | you
-Gore | you
-Florida | you
-they | you
-he | you
-Tiger Bay Club | you
-downtown | you
-Buchanan | you
-candidates | you
-Buchanan | you
-Florida | you
-others | you
-Boy Scouts | you
-gays | you
-Gore | you
-Bush | you
-he | you
-he | you
-he | you
-`` We | you
-party | you
-party | you
-Buchanan | you
-Reform Party | you
-he | you
-Goldwater | you
-Johnson | you
-Nixon | you
-Agnew | you
-McGovern | you
-you | you
-TALLAHASSEE | you
-Fla. | you
-presidential | you
-candidates | you
-Scott Dailey | you
-member | you
-board | you
-here | you
-Pat Buchanan | you
-audience | you
-`` Pat | you
-he | you
-candidate | you
-he | you
-Buchanan | you
-Reform Party | you
-candidate | you
-many | you
-Ralph Nader | you
-President | you
-Al Gore | you
-states | you
-Florida | you
-anyone | you
-Buchanan | you
-Buchanan | you
-He | you
-Dailey | you
-he | you
-Buchanan | you
-Gore | you
-Bush | you
-New York Times | you
+/ CBS News | you
 Buchanan | you
 Florida | you
 He | you
@@ -36460,6 +36381,100 @@ Buchanan | you
 Gore | you
 Bush | you
 New York Times | you
+/ CBS News | you
+Buchanan | you
+Florida | you
+He | you
+anywhere | you
+country | you
+here | you
+Buchanan | you
+he | you
+his | you
+Republicans | you
+conservatives | you
+he | you
+Al Gore | you
+Many | you
+those | you
+who | you
+him | you
+Buchanan | you
+he | you
+Others | you
+he | you
+Republicans | you
+others | you
+Democrats | you
+who | you
+his | you
+they | you
+their | you
+Bush | you
+Gore | you
+Florida | you
+they | you
+he | you
+Tiger Bay Club | you
+downtown | you
+Buchanan | you
+candidates | you
+Buchanan | you
+Florida | you
+others | you
+Boy Scouts | you
+gays | you
+Gore | you
+Bush | you
+he | you
+he | you
+he | you
+`` We | you
+party | you
+party | you
+Buchanan | you
+Reform Party | you
+he | you
+Goldwater | you
+Johnson | you
+Nixon | you
+Agnew | you
+McGovern | you
+you | you
+TALLAHASSEE | you
+Fla. | you
+presidential | you
+candidates | you
+Scott Dailey | you
+member | you
+board | you
+here | you
+Pat Buchanan | you
+audience | you
+`` Pat | you
+he | you
+candidate | you
+he | you
+Buchanan | you
+Reform Party | you
+candidate | you
+many | you
+Ralph Nader | you
+President | you
+Al Gore | you
+states | you
+Florida | you
+anyone | you
+Buchanan | you
+Buchanan | you
+He | you
+Dailey | you
+he | you
+Buchanan | you
+Gore | you
+Bush | you
+New York Times | you
+/ CBS News | you
 Buchanan | you
 Florida | you
 He | you
@@ -36554,6 +36569,7 @@ Buchanan | you
 Gore | you
 Bush | you
 New York Times | you
+/ CBS News | you
 Buchanan | you
 Florida | you
 He | you
@@ -36647,6 +36663,7 @@ he | Bush
 Buchanan | Bush
 Gore | Bush
 New York Times | Bush
+/ CBS News | Bush
 Buchanan | Bush
 Florida | Bush
 He | Bush
@@ -36711,6 +36728,7 @@ he | Bush
 Buchanan | Bush
 Gore | Bush
 New York Times | Bush
+/ CBS News | Bush
 Buchanan | Bush
 Florida | Bush
 He | Bush
@@ -36839,6 +36857,7 @@ he | Al Gore
 Buchanan | Al Gore
 Bush | Al Gore
 New York Times | Al Gore
+/ CBS News | Al Gore
 Buchanan | Al Gore
 Florida | Al Gore
 He | Al Gore
@@ -36882,6 +36901,7 @@ he | Gore
 Buchanan | Gore
 Bush | Gore
 New York Times | Gore
+/ CBS News | Gore
 Buchanan | Gore
 Florida | Gore
 He | Gore
@@ -36943,6 +36963,7 @@ he | Gore
 Buchanan | Gore
 Bush | Gore
 New York Times | Gore
+/ CBS News | Gore
 Buchanan | Gore
 Florida | Gore
 He | Gore
@@ -37165,6 +37186,7 @@ Dailey | Buchanan
 Gore | Buchanan
 Bush | Buchanan
 New York Times | Buchanan
+/ CBS News | Buchanan
 Florida | Buchanan
 Buchanan | He
 TALLAHASSEE | He
@@ -37188,6 +37210,7 @@ Dailey | He
 Gore | He
 Bush | He
 New York Times | He
+/ CBS News | He
 Florida | He
 anywhere | He
 country | He
@@ -37213,6 +37236,7 @@ Dailey | Buchanan
 Gore | Buchanan
 Bush | Buchanan
 New York Times | Buchanan
+/ CBS News | Buchanan
 Florida | Buchanan
 anywhere | Buchanan
 country | Buchanan
@@ -37240,6 +37264,7 @@ Dailey | he
 Gore | he
 Bush | he
 New York Times | he
+/ CBS News | he
 Florida | he
 anywhere | he
 country | he
@@ -37267,6 +37292,7 @@ Dailey | his
 Gore | his
 Bush | his
 New York Times | his
+/ CBS News | his
 Florida | his
 anywhere | his
 country | his
@@ -37294,6 +37320,7 @@ Dailey | he
 Gore | he
 Bush | he
 New York Times | he
+/ CBS News | he
 Florida | he
 anywhere | he
 country | he
@@ -37323,6 +37350,7 @@ Dailey | him
 Gore | him
 Bush | him
 New York Times | him
+/ CBS News | him
 Florida | him
 anywhere | him
 country | him
@@ -37355,6 +37383,7 @@ Dailey | Buchanan
 Gore | Buchanan
 Bush | Buchanan
 New York Times | Buchanan
+/ CBS News | Buchanan
 Florida | Buchanan
 anywhere | Buchanan
 country | Buchanan
@@ -37387,6 +37416,7 @@ Dailey | he
 Gore | he
 Bush | he
 New York Times | he
+/ CBS News | he
 Florida | he
 anywhere | he
 country | he
@@ -37419,6 +37449,7 @@ Dailey | he
 Gore | he
 Bush | he
 New York Times | he
+/ CBS News | he
 Florida | he
 anywhere | he
 country | he
@@ -37453,6 +37484,7 @@ Dailey | his
 Gore | his
 Bush | his
 New York Times | his
+/ CBS News | his
 Florida | his
 anywhere | his
 country | his
@@ -37492,6 +37524,7 @@ Dailey | he
 Gore | he
 Bush | he
 New York Times | he
+/ CBS News | he
 Florida | he
 anywhere | he
 country | he
@@ -37538,6 +37571,7 @@ Dailey | Buchanan
 Gore | Buchanan
 Bush | Buchanan
 New York Times | Buchanan
+/ CBS News | Buchanan
 Florida | Buchanan
 anywhere | Buchanan
 country | Buchanan
@@ -37584,6 +37618,7 @@ Dailey | Buchanan
 Gore | Buchanan
 Bush | Buchanan
 New York Times | Buchanan
+/ CBS News | Buchanan
 Florida | Buchanan
 anywhere | Buchanan
 country | Buchanan
@@ -37634,6 +37669,7 @@ Dailey | he
 Gore | he
 Bush | he
 New York Times | he
+/ CBS News | he
 Florida | he
 anywhere | he
 country | he
@@ -37686,6 +37722,7 @@ Dailey | he
 Gore | he
 Bush | he
 New York Times | he
+/ CBS News | he
 Florida | he
 anywhere | he
 country | he
@@ -37738,6 +37775,7 @@ Dailey | he
 Gore | he
 Bush | he
 New York Times | he
+/ CBS News | he
 Florida | he
 anywhere | he
 country | he
@@ -37790,6 +37828,7 @@ Dailey | Buchanan
 Gore | Buchanan
 Bush | Buchanan
 New York Times | Buchanan
+/ CBS News | Buchanan
 Florida | Buchanan
 anywhere | Buchanan
 country | Buchanan
@@ -37845,6 +37884,7 @@ Dailey | he
 Gore | he
 Bush | he
 New York Times | he
+/ CBS News | he
 Florida | he
 anywhere | he
 country | he
@@ -37905,6 +37945,7 @@ Dailey | he
 Gore | he
 Bush | he
 New York Times | he
+/ CBS News | he
 Florida | he
 anywhere | he
 country | he
@@ -37988,6 +38029,7 @@ Buchanan | others
 Gore | others
 Bush | others
 New York Times | others
+/ CBS News | others
 Buchanan | others
 Florida | others
 He | others
@@ -38062,6 +38104,7 @@ Buchanan | party
 Gore | party
 Bush | party
 New York Times | party
+/ CBS News | party
 Buchanan | party
 Florida | party
 He | party
@@ -39542,42 +39585,42 @@ him | them
 he | them
 you | them
 your | them
-Wisconsin | Wis. .
-CHATTANOOGA | Wis. .
+Wisconsin | Wis.
+CHATTANOOGA | Wis.
 Tenn. | Wis.
 he | Wis.
-his | Wis. .
-Gov. | Wis. .
+his | Wis.
+Gov. | Wis.
 George W. Bush | Wis.
-his | Wis. .
+his | Wis.
 Washington | Wis.
-he | Wis. .
+he | Wis.
 Bush | Wis.
 his | Wis.
-he | Wis. .
-His | Wis. .
+he | Wis.
+His | Wis.
 Tennessee | Wis.
-his | Wis. .
+his | Wis.
 Arkansas | Wis.
-states | Wis. .
-President | Wis. .
-Al Gore | Wis. .
-President | Wis. .
-Clinton | Wis. .
+states | Wis.
+President | Wis.
+Al Gore | Wis.
+President | Wis.
+Clinton | Wis.
 Texas | Wis.
 governor | Wis.
 he | Wis.
 himself | Wis.
 country | Wis.
-hope | Wis. .
-Americans | Wis. .
+hope | Wis.
+Americans | Wis.
 White House | Wis.
 we | Wis.
 leader | Wis.
 who | Wis.
 country | Wis.
 people | Wis.
-people | Wis. .
+people | Wis.
 Bush | Wis.
 hangar | Wis.
 airport | Wis.
@@ -39585,7 +39628,7 @@ here | Wis.
 where | Wis.
 supporters | Wis.
 they | Wis.
-nation | Wis. .
+nation | Wis.
 Bush | Wis.
 them | Wis.
 president | Wis.
@@ -39604,42 +39647,42 @@ who | Wis.
 nation | Wis.
 `` I | Wis.
 president | Wis.
-he | Wis. .
+he | Wis.
 Bush | Wis.
-voters | Wis. .
-His | Wis. .
-Tennessee | Wis. .
+voters | Wis.
+His | Wis.
+Tennessee | Wis.
 Arkansas | Wis.
 his | Wis.
-plane | Wis. .
+plane | Wis.
 Iowa | Wis.
 one | Wis.
-states | Wis. .
+states | Wis.
 Bush | Wis.
-battlegrounds | Wis. .
-Michigan | Wis. .
+battlegrounds | Wis.
+Michigan | Wis.
 Pennsylvania | Wis.
 they | Wis.
 tossups | Wis.
-that | Wis. .
+that | Wis.
 Gore | Wis.
-them | Wis. .
+them | Wis.
 Bush | Wis.
 his | Wis.
-president | Wis. .
+president | Wis.
 He | Wis.
 his | Wis.
 him | Wis.
 supporters | Wis.
-him | Wis. .
+him | Wis.
 Bush | Wis.
 `` I | Wis.
-you | Wis. .
-I | Wis. .
+you | Wis.
+I | Wis.
 Bush | Wis.
 crowd | Wis.
 people | Wis.
-center | Wis. .
+center | Wis.
 Green Bay | Wis.
 `` I | Wis.
 you | Wis.
