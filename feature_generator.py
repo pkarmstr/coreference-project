@@ -28,6 +28,12 @@ class Featurizer:
                 line = line.rstrip().split()
                 i_token = line[5]
                 j_token = line[10]
+                line[1] = int(line[1])
+                line[2] = int(line[2])
+                line[3] = int(line[3])
+                line[6] = int(line[6])
+                line[7] = int(line[7])
+                line[8] = int(line[8])
                 if self.no_tag:
                     line.append(self._clean(i_token))
                     line.append(self._clean(j_token))

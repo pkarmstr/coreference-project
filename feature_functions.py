@@ -167,12 +167,12 @@ def dem_token(feats):
 
 def dem_np(feats):
     fname = feats.article +".raw"
-    sent=POS_DICTIONARY[fname][feats.sentence_ref]
+    sent=RAW_DICTIONARY[fname][int(feats.sentence_ref)]
     if feats.offset_begin_ref>3:
         window = sent[feats.offset_begin_ref-3:feats.offset_begin_ref+1]
     else:
         window = sent[0:feats.offset_begin_ref+1]
-    dems=set('this','these','that','those')
+    dems=set(['this','these','that','those'])
     match = dems.intersection(set(window))
     return "dem_j={}".format(len(match)>0)
 
