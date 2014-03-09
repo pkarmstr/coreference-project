@@ -14,19 +14,12 @@ class Cleaner:
     """better than a Polish maid"""
 
     def __init__(self, input_file, tokenized, basedir):
+        self.data_dict = {}
+        self.bad_rows = 0
+        self.total_rows = 0
         self.original_data = self.open_gold_data(input_file)
         self.tokenized = self.open_tokenization(tokenized)
         self.basedir = basedir
-        self.data_dict = {}
-        self.tokenizer1 = PunktWordTokenizer()
-        self.tokenizer2 = TreebankWordTokenizer()
-        self.ptb_normalization = {"(": "-LRB-",
-                                  ")": "-RRB",
-                                  "[": "-LSB-",
-                                  "]": "-RSB-",
-                                  "{": "-LCB-",
-                                  "}": "-RCB-"}
-
 
     def open_and_parse_xml_file(self, file_name):
         with open(file_name, "r") as f_in:
@@ -58,6 +51,7 @@ class Cleaner:
                     line.insert(-1, "")
                     line.insert(-1, "")
                 original_data.append(FeatureRow(*line))
+                self.total_rows += 1
         return original_data
 
     def open_tokenization(self, f):
@@ -78,7 +72,9 @@ class Cleaner:
             offset_begin += 1
             offset_end += 1
             if offset_end >= len(sentence):
-                raise IndexError("{:d} invalid index, token={:s}".format(offset_end, tokenized))
+                #raise IndexError("{:d} invalid index, token={:s}".format(offset_end, tokenized))
+                self.bad_rows += 1
+                return (-1, -1)
         return (offset_begin, offset_end)
 
     def _clean_the_clean(self, sentence):
@@ -115,12 +111,14 @@ class Cleaner:
                                                                int(fr.offset_begin),
                                                                int(fr.offset_end)
             )
-
+            if offset_begin == -1 or ref_offset[1] == -1:
+                continue
             new_row = " ".join([fr.article, fr.sentence, str(offset_begin), str(offset_end),
                                 fr.entity_type, "_".join(tokenized), fr.sentence_ref,
                                 str(ref_offset[1]), str(ref_offset[2]), fr.entity_type_ref,
                                 "_".join(ref_offset[0]), fr.is_referent])
             all_new.append(new_row)
+        print "{:d} out of {:d} rows didn't have a match".format(self.bad_rows, self.total_rows)
         return new_row
 
     def write_new(self, file_name, data):
