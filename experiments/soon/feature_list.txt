@@ -6,7 +6,6 @@ dem_np
 def_np
 number_agreement
 gender_agreement
-semantic_class?
 both_proper_names
 apposition
 alias
