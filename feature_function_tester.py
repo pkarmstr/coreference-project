@@ -13,12 +13,6 @@ class FeatureTest(unittest.TestCase):
     def setUp(self):
         self.article_title = "NYT20001230.1309.0093.head.coref.raw"
 
-    def test_file_reader(self):
-        self.assertTrue(RAW_DICTIONARY.has_key(self.article_title))
-        self.assertTrue(POS_DICTIONARY.has_key(self.article_title))
-        self.assertTrue(TREES_DICTIONARY.has_key(self.article_title))
-        self.assertTrue("they" in PRONOUN_LIST)
-
     ##quick note: in each line i have added manually the corresponding i_cleaned and j_cleaned before the coref-label.
     def test_dem_token(self):
         #this line does not exist in the data, but it would be the perfect example for the feature
@@ -105,6 +99,7 @@ class FeatureTest(unittest.TestCase):
         self.assertEqual(apposition(feats1).endswith("True"),True)
         self.assertEqual(apposition(feats2).endswith("True"),True)
 
+<<<<<<< HEAD
     def test__is_subject__(self):
         line1 = "NYT20001102.1839.0338.head.coref 9 16 17 PER he 18 7 8 ORG itself he itself no".rstrip().split()
         feats1 = FeatureRow(*line1)
@@ -192,6 +187,8 @@ class FeatureTest(unittest.TestCase):
 
 
 
+=======
+>>>>>>> keelan
 if __name__ == "__main__":
     unittest.main()
 

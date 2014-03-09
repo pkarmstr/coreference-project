@@ -70,14 +70,18 @@ if __name__ == "__main__":
     parser.add_argument("-a", "--answers", help="the input file has the answers", action="store_true")
 
     all_args = parser.parse_args()
+<<<<<<< HEAD
     feature_funcs = [def_np_pos_match]
+=======
+    feature_funcs = []
+>>>>>>> keelan
     feature_funcs.extend(feature_list_reader(all_args.feature_list))
     if all_args.answers:
         feature_funcs.insert(0, is_coreferent)
     f = Featurizer(all_args.input_file, feature_funcs, not all_args.answers)
     f.build_features()
     f.write_new_features(all_args.output_file)
-    print "built your new feature vectors!"
+    print "built your new feature vectors at {}".format(all_args.output_file)
 
 
 
