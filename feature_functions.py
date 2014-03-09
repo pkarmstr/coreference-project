@@ -453,6 +453,14 @@ def dist(fs):
     distance=int(fs.sentence_ref) - int(fs.sentence)
     return "dist={}".format(str(distance))
 
+def dist_ten(fs):
+    """
+    True if the number of sentences b/w the markables is less than or equal to ten, False otherwise.
+    """
+    distance=int(fs.sentence_ref) - int(fs.sentence)
+    print distance<10
+    return "dist_ten={}".format(distance<10)
+
 def i_pronoun(fs):
     """the first markable is a pronoun (includes reflexives)"""
     return "i_pronoun={}".format(fs.token.split('_')[0].lower() in PRONOUN_LIST)
@@ -639,9 +647,7 @@ def both_embedded(fs):
     """
     C if both NPs are prenominal modifiers.
     Approach:
-        - find the token in its parent tree
-        - get the list of tokens that occur after it in that tree
-        - if for both i and j that list contains a noun, return True
+        - look at 2 tokens ahead of i and j and see if either of them are nouns (the tree approach didn't work)
     """
     i_embedded=False
     j_embedded=False
