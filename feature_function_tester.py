@@ -184,6 +184,11 @@ class FeatureTest(unittest.TestCase):
         self.assertEqual(word_overlap(fs1).endswith("False"),True)
         self.assertEqual(word_overlap(fs2).endswith("False"),True)
 
+    def test_could_be_coindexed(self):
+        line1 = "NYT20001020.2144.0366.head.coref 11 15 16 PER executive 11 17 18 ORG Associates executive Associates no".rstrip().split()
+        feats1 = FeatureRow(*line1)
+        self.assertEqual(could_be_coindexed(feats1).endswith("False"),True)
+
 if __name__ == "__main__":
     unittest.main()
 

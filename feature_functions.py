@@ -341,6 +341,29 @@ def span(feats):
 
 
 
+def could_be_coindexed(feats):
+    """two non pronominal entities separated by a preposition cannot be coindexed"""
+    if feats.sentence != feats.sentence_ref:
+        return "could_be_coindexed={}".format(True)
+    else:
+        sent=POS_DICTIONARY[feats.article +".raw"][int(feats.sentence)]
+        i_pron = i_pronoun(feats).endswith("True")
+        j_pron = j_pronoun(feats).endswith("True")
+        if not i_pron and not j_pron:
+            if feats.offset_end < feats.offset_begin_ref:
+                inbetween= [tag for w,tag in sent[int(feats.offset_end):int(feats.offset_begin_ref)]]
+            else:
+                inbetween=[tag for w,tag in sent[int(feats.offset_begin_ref):int(feats.offset_begin)]]
+
+            if len(inbetween)<=2 and 'IN' in inbetween:
+                return "could_be_coindexed={}".format(False)
+
+        return "could_be_coindexed={}".format(True)
+
+
+
+
+
 
 
 
@@ -377,6 +400,7 @@ def span(feats):
     #            if found:
     #                break
     #    return found
+
 
 
 
