@@ -4,6 +4,14 @@ from nltk.corpus import names
 from nltk.corpus import wordnet as wn
 from nltk.tree import ParentedTree
 
+###############
+# basic stuff #
+###############
+
+def is_coreferent(fs):
+    return fs.is_coreferent
+
+
 ################
 # Anya's stuff #
 ################

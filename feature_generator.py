@@ -70,11 +70,8 @@ if __name__ == "__main__":
     parser.add_argument("-a", "--answers", help="the input file has the answers", action="store_true")
 
     all_args = parser.parse_args()
-<<<<<<< HEAD
-    feature_funcs = [def_np_pos_match]
-=======
+
     feature_funcs = []
->>>>>>> keelan
     feature_funcs.extend(feature_list_reader(all_args.feature_list))
     if all_args.answers:
         feature_funcs.insert(0, is_coreferent)
