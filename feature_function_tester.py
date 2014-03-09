@@ -99,7 +99,6 @@ class FeatureTest(unittest.TestCase):
         self.assertEqual(apposition(feats1).endswith("True"),True)
         self.assertEqual(apposition(feats2).endswith("True"),True)
 
-<<<<<<< HEAD
     def test__is_subject__(self):
         line1 = "NYT20001102.1839.0338.head.coref 9 16 17 PER he 18 7 8 ORG itself he itself no".rstrip().split()
         feats1 = FeatureRow(*line1)
@@ -185,10 +184,6 @@ class FeatureTest(unittest.TestCase):
         self.assertEqual(word_overlap(fs1).endswith("False"),True)
         self.assertEqual(word_overlap(fs2).endswith("False"),True)
 
-
-
-=======
->>>>>>> keelan
 if __name__ == "__main__":
     unittest.main()
 
