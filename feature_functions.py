@@ -1,11 +1,157 @@
 
-from file_reader import TREES_DICTIONARY, POS_DICTIONARY, RAW_DICTIONARY, PRONOUN_LIST, FeatureRow
+from file_reader import TREES_DICTIONARY, POS_DICTIONARY, RAW_DICTIONARY, PRONOUN_LIST, NONCONTENT_SET, FeatureRow
 import re, os, nltk
 from nltk.corpus import names
 from nltk.corpus import wordnet as wn
 from nltk.tree import ParentedTree
 
+################
+# Anya's stuff #
+################
 
+def _later_markable(fs):
+    """
+    Tells you which token in a coref pair occurs later in the text.
+    Returns 'i' if it's the first one, and 'j' if it's the second one.
+    """
+
+    if int(fs.sentence) > int(fs.sentence_ref):
+        return 'i'
+    elif int(fs.sentence) < int(fs.sentence_ref):
+        return 'j'
+    elif int(fs.sentence)==int(fs.sentence_ref):
+        if int(fs.offset_begin) > int(fs.offset_begin_ref):
+            return 'i'
+        elif int(fs.offset_begin) < int(fs.offset_begin_ref):
+            return 'j'
+    else:
+        print "Error in later_markable(): Something screwy going on with offsets"
+
+def __pos_match__(fs):
+    """
+    True if both markables have the same part of speech, False otherwise.
+    Used in conjunction with def_np feature (and maybe dem_np too?)
+    """
+
+    pos_i = __get_pos__(fs.article,fs.sentence,fs.offset_begin,fs.offset_end)
+    pos_j = __get_pos__(fs.article,fs.sentence_ref,fs.offset_begin_ref,fs.offset_end_ref)
+
+    return pos_i==pos_j
+
+def def_np_pos_match(fs):
+    result=((def_np(fs).endswith("True")) and __pos_match__(fs))
+    return "def_np_pos_match={}".format(result)
+
+def def_np(fs):
+    """applies only to j (the second markable; this probably means the LATER one, not the right-hand side one)
+        Its possible values are true or false. In our definition, a definite noun phrase is a noun phrase that
+        starts with the word the. For example, the car is a definite noun phrase. If j is a definite noun phrase,
+        return true; else return false."""
+
+    #figure out which mention is the later one
+    later_mention = _later_markable(fs)
+
+    # get the tree that dominates the later mention
+    if later_mention=='i':
+        sent_tree=TREES_DICTIONARY[fs.article+".raw"][int(fs.sentence)]
+        parent_tree=__get_parent_tree__(fs.token, sent_tree)
+    elif later_mention=='j':
+        sent_tree=TREES_DICTIONARY[fs.article+".raw"][int(fs.sentence_ref)]
+        parent_tree=__get_parent_tree__(fs.token_ref, sent_tree)
+
+    # see if that parent tree is an NP that starts with "the" and return true if it does
+    return "def_np={}".format(parent_tree.node=='NP' and parent_tree.leaves()[0].lower()=='the')
+
+def i_pos(fs):
+    """written for practice, don't have to use"""
+    sent_num=fs.sentence
+    start_index=fs.offset_begin
+    end_index=fs.offset_end
+    fname=fs.article+".raw"
+    return "i_pos={}".format(__get_pos__(fname,sent_num,start_index,end_index))
+
+def dist(fs):
+    """number of sentences between the markables"""
+    distance=int(fs.sentence_ref) - int(fs.sentence)
+    return "dist={}".format(str(distance))
+
+def i_pronoun(fs):
+    """the first markable is a pronoun (includes reflexives)"""
+    return "i_pronoun={}".format(fs.token.split('_')[0].lower() in PRONOUN_LIST)
+
+def j_pronoun(fs):
+    """the second markable is a pronoun (includes reflexives)"""
+    return "j_pronoun={}".format(fs.token_ref.split('_')[0].lower() in PRONOUN_LIST)
+
+def string_match(fs):
+    """allows full string match or partial string match, both ways"""
+    return "string_match={}".format((fs.i_cleaned in fs.j_cleaned) or (fs.j_cleaned in fs.i_cleaned))
+
+def word_overlap(fs):
+    """
+    True if the intersection between the content words in NP(i) and NP(j) is not empty;
+    else False.
+    """
+    sent_i=TREES_DICTIONARY[fs.article+".raw"][int(fs.sentence)]
+    sent_j=TREES_DICTIONARY[fs.article+".raw"][int(fs.sentence_ref)]
+    parent_i = __get_parent_tree__(fs.token,sent_i)
+    parent_j = __get_parent_tree__(fs.token_ref,sent_j)
+
+    #convert everything to lowercase
+    lowercase_leaves_i=parent_i.leaves()
+    lowercase_leaves_j=parent_j.leaves()
+
+    for p,word in enumerate(lowercase_leaves_i):
+        lowercase_leaves_i[p] = lowercase_leaves_i[p].lower()
+
+    for q,word in enumerate(lowercase_leaves_j):
+        lowercase_leaves_j[q] = lowercase_leaves_j[q].lower()
+
+    all_words_i = set(lowercase_leaves_i)
+    all_words_j = set(lowercase_leaves_j)
+
+    content_words_i=all_words_i.difference(NONCONTENT_SET) #all words minus non-content words
+    content_words_j=all_words_j.difference(NONCONTENT_SET)
+
+    intersection=content_words_i.intersection(content_words_j)
+
+    return "word_overlap={}".format(len(intersection)>0)
+
+def word_overlap_complete(fs):
+    """
+    True if all the content words in the two phrases are exactly the same.
+    """
+    sent_i=TREES_DICTIONARY[fs.article+".raw"][int(fs.sentence)]
+    sent_j=TREES_DICTIONARY[fs.article+".raw"][int(fs.sentence_ref)]
+    parent_i = __get_parent_tree__(fs.token,sent_i)
+    parent_j = __get_parent_tree__(fs.token_ref,sent_j)
+
+    #convert everything to lowercase
+    lowercase_leaves_i=parent_i.leaves()
+    lowercase_leaves_j=parent_j.leaves()
+
+    for p,word in enumerate(lowercase_leaves_i):
+        lowercase_leaves_i[p] = lowercase_leaves_i[p].lower()
+
+    for q,word in enumerate(lowercase_leaves_j):
+        lowercase_leaves_j[q] = lowercase_leaves_j[q].lower()
+
+    all_words_i = set(lowercase_leaves_i)
+    all_words_j = set(lowercase_leaves_j)
+
+    content_words_i=all_words_i.difference(NONCONTENT_SET) #all words minus non-content words
+    content_words_j=all_words_j.difference(NONCONTENT_SET)
+
+    intersection=content_words_i.intersection(content_words_j)
+
+    result=(len(content_words_i)==len(content_words_j)) and (len(intersection)==len(content_words_i))
+
+    return "word_overlap_complete={}".format(result)
+
+
+################
+# Julia's stuff #
+################
 
 def dem_token(feats):
     """WORKS!"""
@@ -293,10 +439,10 @@ def is_pred_nominal(feats):
     if feats.sentence != feats.sentence_ref:
         return "is_pred_nominal={}".format(False)
     else:
-        tree = ParentedTree.convert(TREES_DICTIONARY[feats.article+".raw"][int(feats.sentence)])
-        NP_i = __get_parent_tree__(feats.token, tree)
-        NP_j = __get_parent_tree__(feats.token_ref,tree)
-        nominal= __get_max_projection__(tree,NP_j)
+        s_tree = ParentedTree.convert(TREES_DICTIONARY[feats.article+".raw"][int(feats.sentence)])
+        NP_i = __get_parent_tree__(feats.token, s_tree)
+        NP_j = __get_parent_tree__(feats.token_ref,s_tree)
+        nominal= __get_max_projection__(s_tree,NP_j)
         copula_verbs = set(["is","are","were","was","am"])
         def check_nominal_construction(tree):
             found = False
@@ -318,7 +464,34 @@ def is_pred_nominal(feats):
                         found = check_nominal_construction(t)
             return found
 
-        return "is_pred_nominal={}".format(check_nominal_construction(tree))
+        return "is_pred_nominal={}".format(check_nominal_construction(s_tree))
+
+
+
+def span(feats):
+    if feats.sentence != feats.sentence_ref:
+        return "span={}".format(False)
+    else:
+        s_tree = ParentedTree.convert(TREES_DICTIONARY[feats.article+".raw"][int(feats.sentence)])
+        i_parent = __get_parent_tree__(feats.token, s_tree)
+        j_parent = __get_parent_tree__(feats.token_ref,s_tree)
+        return "span={}".format(i_parent==j_parent)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
