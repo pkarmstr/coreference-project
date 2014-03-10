@@ -121,11 +121,33 @@ class FeatureTest(unittest.TestCase):
         parent2_i = __get_parent_tree__(feats2.token, tree2_i)
         parent3_i = __get_parent_tree__(feats3.token, tree3_i)
         parent4_i = __get_parent_tree__(feats4.token, tree4_i)
-        self.assertEqual(__is_subject__(tree1_i,feats1.token, parent1_i),True)
-        self.assertEqual(__is_subject__(tree1_j,feats1.token_ref,parent1_j),False)
-        self.assertEqual(__is_subject__(tree2_i,feats2.token, parent2_i),True)
-        self.assertEqual(__is_subject__(tree3_i,feats3.token, parent3_i),False)
-        self.assertEqual(__is_subject__(tree4_i,feats4.token, parent4_i),True)
+        self.assertEqual(__is_subject__(tree1_i,feats1.token, parent1_i,tree1_i),True)
+        self.assertEqual(__is_subject__(tree1_j,feats1.token_ref,parent1_j,tree1_j),False)
+        self.assertEqual(__is_subject__(tree2_i,feats2.token, parent2_i,tree2_i),True)
+        self.assertEqual(__is_subject__(tree3_i,feats3.token, parent3_i,tree3_i),False)
+        self.assertEqual(__is_subject__(tree4_i,feats4.token, parent4_i,tree4_i),True)
+
+    def test_i_is_subject(self):
+        line1 = "NYT20001102.1839.0338.head.coref 9 16 17 PER he 18 7 8 ORG itself he itself no".rstrip().split()
+        feats1 = FeatureRow(*line1)
+        self.assertEqual(i_is_subject(feats1).endswith("True"),True)
+
+    def test_j_is_subject(self):
+        line1 = "NYT20001027.1622.0218.head.coref 10 14 15 PER perpetrators 12 7 8 ORG we perpetrators we no".rstrip().split()
+        feats1 = FeatureRow(*line1)
+        self.assertEqual(j_is_subject(feats1).endswith("True"),True)
+
+    def test_both_subjects(self):
+        line1 = "NYT20001027.1622.0218.head.coref 12 24 26 PER Roberta_Burroughs 14 0 1 PER Ballmer Roberta_Burroughs Ballmer no".rstrip().split()
+        feats1 = FeatureRow(*line1)
+        self.assertEqual(j_is_subject(feats1).endswith("True"),True)
+        self.assertEqual(i_is_subject(feats1).endswith("True"),True)
+        self.assertEqual(both_subjects(feats1).endswith("True"), True)
+
+    def test_none_is_subject(self):
+        line1 = "NYT20001027.1622.0218.head.coref 13 13 14 GPE Sweden 13 35 36 ORG our Sweden our no ".rstrip().split()
+        feats1 = FeatureRow(*line1)
+        self.assertEqual(none_is_subject(feats1).endswith("True"),True)
 
 
 
@@ -153,6 +175,11 @@ class FeatureTest(unittest.TestCase):
         feats2 = FeatureRow(*line2)
         self.assertEqual(is_pred_nominal(feats1).endswith("True"),True)
         self.assertEqual(is_pred_nominal(feats2).endswith("False"),True)
+
+    def test_span(self):
+        line1 = "NYT20001111.1033.0046.head.coref 13 21 22 PER voters 13 20 21 PER Asian voters Asian no".rstrip().split()
+        feats1 = FeatureRow(*line1)
+        self.assertEqual(span(feats1).endswith("True"),True)
 
 
     def test_def_np(self):
@@ -183,6 +210,41 @@ class FeatureTest(unittest.TestCase):
         line1 = "NYT20001020.2144.0366.head.coref 11 15 16 PER executive 11 17 18 ORG Associates executive Associates no".rstrip().split()
         feats1 = FeatureRow(*line1)
         self.assertEqual(could_be_coindexed(feats1).endswith("False"),True)
+
+    def test_compatible_syntax(self):
+        line1 = "NYT20001111.1033.0046.head.coref 15 14 15 PER majority 19 20 21 PER Gore majority Gore no".rstrip().split()
+        feats1 = FeatureRow(*line1)
+        line2 = "NYT20001111.1033.0046.head.coref 15 14 15 PER majority 15 16 17 PER women majority women no".rstrip().split()
+        feats2 = FeatureRow(*line2)
+        self.assertEqual(compatible_syntax(feats1).endswith("True"),True)
+        self.assertEqual(compatible_syntax(feats2).endswith("False"),True)
+
+    def test_j_indefinite(self):
+        line1 = "NYT20001111.1033.0046.head.coref 15 0 1 PER Bush 15 16 17 PER women Bush women no".rstrip().split()
+        feats1 = FeatureRow(*line1)
+        line2 = "NYT20001027.1622.0218.head.coref 8 12 13 PER spokesman 8 14 16 PER Mark_Murray spokesman Mark_Murray yes".rstrip().split()
+        feats2 = FeatureRow(*line2)
+        self.assertEqual(j_indefinite(feats1).endswith("True"),True)
+        self.assertEqual(j_indefinite(feats2).endswith("False"),True)
+
+    def test_i_pron_j_not_pron(self):
+        line1 = "NYT20001020.2144.0366.head.coref 12 24 25 PER she 13 0 1 ORG Associates she Associates no".rstrip().split()
+        feats1 = FeatureRow(*line1)
+        self.assertEqual(i_pron_j_not_pron(feats1).endswith("True"),True)
+
+    def meet_all_constraints(self):
+        line1 = "NYT20001111.1033.0046.head.coref 26 10 11 PER Gore 30 8 9 PER Democrat Gore Democrat yes".rstrip().split()
+        feats1 = FeatureRow(*line1)
+        line2 = "NYT20001111.1033.0046.head.coref 10 0 2 PER Ralph_Nader 10 3 4 PER who Ralph_Nader who yes".rstrip().split()
+        feats2 = FeatureRow(*line2)
+        line3 = "NYT20001111.1033.0046.head.coref 60 0 1 PER Those 60 1 2 PER who Those who yes".rstrip().split()
+        feats3 = FeatureRow(*line3)
+        line4 = "NYT20001019.2136.0319.head.coref 19 14 15 PER people 19 15 16 PER who people who yes".rstrip().split()
+        feats4 = FeatureRow(*line4)
+        self.assertEqual(meet_all_constraints(feats1).endswith("True"),True)
+        self.assertEqual(meet_all_constraints(feats2).endswith("True"),True)
+        self.assertEqual(meet_all_constraints(feats3).endswith("True"),True)
+        self.assertEqual(meet_all_constraints(feats4).endswith("True"),True)
 
 if __name__ == "__main__":
     unittest.main()

@@ -21,6 +21,7 @@ def dem_token(feats):
     return "dem_token={}".format(len(dem_re) > 0)
 
 def dem_np(feats):
+    """WORKS"""
     fname = feats.article +".raw"
     sent=RAW_DICTIONARY[fname][int(feats.sentence_ref)]
     if feats.offset_begin_ref>3:
@@ -39,7 +40,8 @@ def number_agreement(feats):
                                 feats.offset_begin,feats.offset_end)
     j_number= __determine_number__(feats.article, feats.sentence_ref, feats.token_ref,
                                feats.offset_begin_ref,feats.offset_end_ref)
-    return "number_agreement={}".format(i_number==j_number)
+    one_unknown = i_number == "unknown" or j_number == "unknown"
+    return "number_agreement={}".format(i_number==j_number or one_unknown)
 
 
 def __get_pos__(fname,sent_num,start_index,end_index):
@@ -61,6 +63,8 @@ def __determine_number__(article,sentence,token, start_index, end_index):
             return "plural"
     elif pos_tag == "NNS":
         return "plural"
+    elif pos_tag == "WP" or pos_tag == "WP$":
+        return "unknown"
     return "singular"
 
 
@@ -203,7 +207,21 @@ def __get_parent_tree__(unclean_token, t):
     return parent_tree
 
 
-def __is_subject__(curr_tree,token, parent):
+
+def __get_max_projection__(bigger_tree,target_tree):
+    max_p = None
+    for child in bigger_tree:
+        if isinstance(max_p, ParentedTree):
+            break
+        elif isinstance(child, ParentedTree):
+            if child == target_tree:
+                max_p = bigger_tree
+            else:
+                max_p = __get_max_projection__(child,target_tree)
+    return max_p
+
+def __is_subject__(curr_tree,token, parent, sentence_tree):
+    """WORKS"""
     found = False
     for child in curr_tree:
         if isinstance(child, ParentedTree):
@@ -216,8 +234,13 @@ def __is_subject__(curr_tree,token, parent):
                 if isinstance(right_brother,ParentedTree): #OVS
                     if right_brother.node == "VP" or right_brother.node == "S":
                         found = True
+
+                OVS_with_apposition = __get_max_projection__(sentence_tree,parent)
+                if isinstance(OVS_with_apposition, ParentedTree):
+                    if __is_subject__(sentence_tree,token,OVS_with_apposition,sentence_tree):
+                        found = True
             else:
-                found = __is_subject__(child,token, parent)
+                found = __is_subject__(child,token, parent,sentence_tree)
         if found:
             break
     return found
@@ -245,35 +268,41 @@ def __is_subject__(curr_tree,token, parent):
 
 
 def i_is_subject(feats):
+    "WORKS"
     sentence_tree = TREES_DICTIONARY[feats.article+".raw"][int(feats.sentence)]
     ptree = ParentedTree.convert(sentence_tree)
     parent = __get_parent_tree__(feats.token, ptree)
-    i_subject = __is_subject__(ptree,feats.token)
+    i_subject = __is_subject__(ptree,feats.token,parent,ptree)
     return "i_is_subject={}".format(i_subject)
 
 def j_is_subject(feats):
+    "WORKS"
     sentence_tree = TREES_DICTIONARY[feats.article+".raw"][int(feats.sentence_ref)]
     ptree = ParentedTree.convert(sentence_tree)
     parent = __get_parent_tree__(feats.token_ref, ptree)
-    j_subject = __is_subject__(ptree,feats.token_ref)
+    j_subject = __is_subject__(ptree,feats.token_ref, parent,ptree)
     return "j_is_subject={}".format(j_subject)
 
 def both_subjects(feats):
+    """WORKS"""
     both_bool = i_is_subject(feats).endswith("True") and j_is_subject(feats).endswith("True")
     return "both_subjects={}".format(both_bool)
 
 
 def none_is_subject(feats):
+    """WORKS"""
     none_bool = i_is_subject(feats).endswith("False") and j_is_subject(feats).endswith("False")
     return "none_is_subject={}".format(none_bool)
 
 def animacy_agreement(feats):
+    """"WORKS"""
     both_people = feats.entity_type == "PER" and feats.entity_type_ref == "PER"
     both_not_people = feats.entity_type != "PER" and feats.entity_type_ref != "PER"
     return "animacy_agreement={}".format(both_people or both_not_people)
 
 
 def same_max_NP(feats):
+    """WORKS"""
     if feats.sentence !=  feats.sentence_ref:
         return "same_max_NP={}".format(False)
     else:
@@ -287,20 +316,11 @@ def same_max_NP(feats):
         return "same_max_NP={}".format(max_p_i == max_p_j and both_NPs)
 
 
-def __get_max_projection__(bigger_tree,target_tree):
-    max_p = None
-    for child in bigger_tree:
-        if isinstance(max_p, ParentedTree):
-            break
-        elif isinstance(child, ParentedTree):
-            if child == target_tree:
-                max_p = bigger_tree
-            else:
-                max_p = __get_max_projection__(child,target_tree)
-    return max_p
+
 
 
 def is_pred_nominal(feats):
+    """WORKS"""
     if feats.sentence != feats.sentence_ref:
         return "is_pred_nominal={}".format(False)
     else:
@@ -333,6 +353,7 @@ def is_pred_nominal(feats):
 
 
 def span(feats):
+    """WORKS"""
     if feats.sentence != feats.sentence_ref:
         return "span={}".format(False)
     else:
@@ -344,7 +365,8 @@ def span(feats):
 
 
 def could_be_coindexed(feats):
-    """two non pronominal entities separated by a preposition cannot be coindexed"""
+    """two non pronominal entities separated by a preposition cannot be coindexed
+    WORKS"""
     if feats.sentence != feats.sentence_ref:
         return "could_be_coindexed={}".format(True)
     else:
@@ -364,25 +386,30 @@ def could_be_coindexed(feats):
 
 
 def compatible_syntax(feats):
+    """WORKS"""
     compatible = could_be_coindexed(feats).endswith("True") and span(feats).endswith("False")
     return "compatible_syntax={}".format(compatible)
 
 def j_indefinite(feats):
-    "j is not definite but it isn't an apposition either"
+    """j is not definite but it isn't an apposition either
+    WORKS"""
     return "j_indefinite={}".format(def_np(feats).endswith("False") and
-                                    apposition(feats).endswith("false"))
+                                    apposition(feats).endswith("False"))
 
 def i_pron_j_not_pron(feats):
+    """WORKS"""
     return "i_pron_j_not_pron={}".format(i_pronoun(feats).endswith("True") and
                                          j_pronoun(feats).endswith("False"))
 
 def meet_all_constraints(feats):
+    """WORKS"""
     gender_agree = gender_agreement(feats).endswith("True") or gender_agreement(feats).endswith("unknown")
     number_agree = number_agreement(feats).endswith("True")
     compatible_syntx = compatible_syntax(feats).endswith("True")
     animacy_agree = animacy_agreement(feats).endswith("True")
     entity_agree = animacy_agreement(feats).endswith("True")
-    compatible = gender_agree and number_agree and compatible_syntx and animacy_agree
+    compatible = gender_agree and number_agree and \
+                 compatible_syntx and animacy_agree and entity_agree
     return "meet_all_constraints={}".format(compatible)
 
 
