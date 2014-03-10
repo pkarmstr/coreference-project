@@ -21,6 +21,7 @@ def dem_token(feats):
     return "dem_token={}".format(len(dem_re) > 0)
 
 def dem_np(feats):
+    """WORKS"""
     fname = feats.article +".raw"
     sent=RAW_DICTIONARY[fname][int(feats.sentence_ref)]
     if feats.offset_begin_ref>3:
@@ -39,7 +40,8 @@ def number_agreement(feats):
                                 feats.offset_begin,feats.offset_end)
     j_number= __determine_number__(feats.article, feats.sentence_ref, feats.token_ref,
                                feats.offset_begin_ref,feats.offset_end_ref)
-    return "number_agreement={}".format(i_number==j_number)
+    one_unknown = i_number == "unknown" or j_number == "unknown"
+    return "number_agreement={}".format(i_number==j_number or one_unknown)
 
 
 def __get_pos__(fname,sent_num,start_index,end_index):
@@ -61,6 +63,8 @@ def __determine_number__(article,sentence,token, start_index, end_index):
             return "plural"
     elif pos_tag == "NNS":
         return "plural"
+    elif pos_tag == "WP" or pos_tag == "WP$":
+        return "unknown"
     return "singular"
 
 
@@ -141,37 +145,41 @@ def entity_type_agreement(feats):
 
 def apposition(feats): #this was driving me MAD....I SHOULD CORRECT THE STYLE...aarrrrggghhshs
     """WORKS WITH THE EXAMPLES IN UNITTEST, HOPE THEY WERE NOT A COINDIDENCE"""
-    sentence_tree = TREES_DICTIONARY[feats.article+".raw"][int(feats.sentence_ref)]
-    ptree = ParentedTree.convert(sentence_tree)
-    token_ref = set(feats.token_ref.split("_"))
-    token = set(feats.token.split("_"))
-    def is_j_apposition(curr_tree):
-            found = False
-            for child in curr_tree:
-                if found:
-                    break
-                elif isinstance(child, ParentedTree):
-                    child_leaves = set(child.leaves())
-                    conditions = len(token_ref.intersection(child_leaves))>0 and curr_tree.node == "NP"
-                    if conditions:
-                        brother = child.left_sibling()
-                        if isinstance(brother, ParentedTree) and brother.node == ",":
-                            antecedent = brother.left_sibling()
-                            if isinstance(antecedent,ParentedTree):
-                                previous_words = set(antecedent.leaves())
-                                if len(token.intersection(previous_words))>0:
-                                    found = True
-                    else:
-                        found = is_j_apposition(child)
+    if feats.sentence!=feats.sentence_ref:
+        return "apposition={}".format(False)
+    else:
+        sentence_tree = TREES_DICTIONARY[feats.article+".raw"][int(feats.sentence_ref)]
+        ptree = ParentedTree.convert(sentence_tree)
+        token_ref = set(feats.token_ref.split("_"))
+        token = set(feats.token.split("_"))
+        def is_j_apposition(curr_tree):
+                found = False
+                for child in curr_tree:
+                    if found:
+                        break
+                    elif isinstance(child, ParentedTree):
+                        child_leaves = set(child.leaves())
+                        conditions = len(token_ref.intersection(child_leaves))>0 and curr_tree.node == "NP"
+                        if conditions:
+                            brother = child.left_sibling()
+                            if isinstance(brother, ParentedTree) and brother.node == ",":
+                                antecedent = brother.left_sibling()
+                                if isinstance(antecedent,ParentedTree):
+                                    previous_words = set(antecedent.leaves())
+                                    if len(token.intersection(previous_words))>0:
+                                        found = True
+                        else:
+                            found = is_j_apposition(child)
 
-            return found
-    return "apposition={}".format(is_j_apposition(ptree))
+                return found
+        return "apposition={}".format(is_j_apposition(ptree))
 
 
 #ANYA'S FUNCTION :)
 def __get_parent_tree__(unclean_token, t):
     """
     Given a token, returns the subtree that dominates that token in the corresponding parse tree.
+    (Goes one level up from the POS)
     """
     words = unclean_token.split('_')
     leaf_indices=[]
@@ -196,11 +204,48 @@ def __get_parent_tree__(unclean_token, t):
     else:
         position_tuple=t.leaf_treeposition(start)
 
-    parent_tree=t[position_tuple[:-2]]
+    if not isinstance(t[position_tuple],str) and t[position_tuple].node.endswith('P') and \
+                    t[position_tuple].node!='PRP' and t[position_tuple].node!='NNP':
+        parent_tree=t[position_tuple]
+
+    else:
+        parent_tree=t[position_tuple[:-2]]
+
     return parent_tree
 
+def parent_test(fs):
+    """
+    Used for testing the ___get_parent_tree__ function. DNU otherwise.
+    """
+    i_t=TREES_DICTIONARY[fs.article+'.raw'][int(fs.sentence)]
+    j_t=TREES_DICTIONARY[fs.article+'.raw'][int(fs.sentence_ref)]
+    parent_i=__get_parent_tree__(fs.token,i_t)
+    parent_j=__get_parent_tree__(fs.token_ref,j_t)
+    print "LEFT SIDE:"
+    print fs.token
+    print parent_i.__repr__()
+    print
+    print "RIGHT SIDE:"
+    print fs.token_ref
+    print parent_j.__repr__()
+    print
+    print
+    return "parent_test={}".format('Blah')
 
-def __is_subject__(curr_tree,token, parent):
+def __get_max_projection__(bigger_tree,target_tree):
+    max_p = None
+    for child in bigger_tree:
+        if isinstance(max_p, ParentedTree):
+            break
+        elif isinstance(child, ParentedTree):
+            if child == target_tree:
+                max_p = bigger_tree
+            else:
+                max_p = __get_max_projection__(child,target_tree)
+    return max_p
+
+def __is_subject__(curr_tree,token, parent, sentence_tree):
+    """WORKS"""
     found = False
     for child in curr_tree:
         if isinstance(child, ParentedTree):
@@ -213,8 +258,13 @@ def __is_subject__(curr_tree,token, parent):
                 if isinstance(right_brother,ParentedTree): #OVS
                     if right_brother.node == "VP" or right_brother.node == "S":
                         found = True
+
+                OVS_with_apposition = __get_max_projection__(sentence_tree,parent)
+                if isinstance(OVS_with_apposition, ParentedTree):
+                    if __is_subject__(sentence_tree,token,OVS_with_apposition,sentence_tree):
+                        found = True
             else:
-                found = __is_subject__(child,token, parent)
+                found = __is_subject__(child,token, parent,sentence_tree)
         if found:
             break
     return found
@@ -242,34 +292,41 @@ def __is_subject__(curr_tree,token, parent):
 
 
 def i_is_subject(feats):
-    sentence_tree = TREES_DICTIONARY[feats.article+".raw"][int(feats.sentence_ref)]
+    "WORKS"
+    sentence_tree = TREES_DICTIONARY[feats.article+".raw"][int(feats.sentence)]
     ptree = ParentedTree.convert(sentence_tree)
     parent = __get_parent_tree__(feats.token, ptree)
-    i_subject = __is_subject__(ptree,feats.token)
+    i_subject = __is_subject__(ptree,feats.token,parent,ptree)
     return "i_is_subject={}".format(i_subject)
 
 def j_is_subject(feats):
+    "WORKS"
     sentence_tree = TREES_DICTIONARY[feats.article+".raw"][int(feats.sentence_ref)]
     ptree = ParentedTree.convert(sentence_tree)
     parent = __get_parent_tree__(feats.token_ref, ptree)
-    j_subject = __is_subject__(ptree,feats.token_ref)
+    j_subject = __is_subject__(ptree,feats.token_ref, parent,ptree)
     return "j_is_subject={}".format(j_subject)
 
 def both_subjects(feats):
+    """WORKS"""
     both_bool = i_is_subject(feats).endswith("True") and j_is_subject(feats).endswith("True")
     return "both_subjects={}".format(both_bool)
 
 
 def none_is_subject(feats):
+    """WORKS"""
     none_bool = i_is_subject(feats).endswith("False") and j_is_subject(feats).endswith("False")
     return "none_is_subject={}".format(none_bool)
 
 def animacy_agreement(feats):
+    """"WORKS"""
     both_people = feats.entity_type == "PER" and feats.entity_type_ref == "PER"
     both_not_people = feats.entity_type != "PER" and feats.entity_type_ref != "PER"
     return "animacy_agreement={}".format(both_people or both_not_people)
 
+
 def same_max_NP(feats):
+    """WORKS"""
     if feats.sentence !=  feats.sentence_ref:
         return "same_max_NP={}".format(False)
     else:
@@ -284,21 +341,10 @@ def same_max_NP(feats):
 
 
 
-def __get_max_projection__(bigger_tree,target_tree):
-    max_p = None
-    for child in bigger_tree:
-        if isinstance(max_p, ParentedTree):
-            break
-        elif isinstance(child, ParentedTree):
-            if child == target_tree:
-                max_p = bigger_tree
-            else:
-                max_p = __get_max_projection__(child,target_tree)
-    return max_p
-
 
 
 def is_pred_nominal(feats):
+    """WORKS"""
     if feats.sentence != feats.sentence_ref:
         return "is_pred_nominal={}".format(False)
     else:
@@ -331,6 +377,7 @@ def is_pred_nominal(feats):
 
 
 def span(feats):
+    """WORKS"""
     if feats.sentence != feats.sentence_ref:
         return "span={}".format(False)
     else:
@@ -341,45 +388,53 @@ def span(feats):
 
 
 
+def could_be_coindexed(feats):
+    """two non pronominal entities separated by a preposition cannot be coindexed
+    WORKS"""
+    if feats.sentence != feats.sentence_ref:
+        return "could_be_coindexed={}".format(True)
+    else:
+        sent=POS_DICTIONARY[feats.article +".raw"][int(feats.sentence)]
+        i_pron = i_pronoun(feats).endswith("True")
+        j_pron = j_pronoun(feats).endswith("True")
+        if not i_pron and not j_pron:
+            if feats.offset_end < feats.offset_begin_ref:
+                inbetween= [tag for w,tag in sent[int(feats.offset_end):int(feats.offset_begin_ref)]]
+            else:
+                inbetween=[tag for w,tag in sent[int(feats.offset_begin_ref):int(feats.offset_begin)]]
+
+            if len(inbetween)<=2 and 'IN' in inbetween:
+                return "could_be_coindexed={}".format(False)
+
+        return "could_be_coindexed={}".format(True)
 
 
+def compatible_syntax(feats):
+    """WORKS"""
+    compatible = could_be_coindexed(feats).endswith("True") and span(feats).endswith("False")
+    return "compatible_syntax={}".format(compatible)
 
+def j_indefinite(feats):
+    """j is not definite but it isn't an apposition either
+    WORKS"""
+    return "j_indefinite={}".format(def_np(feats).endswith("False") and
+                                    apposition(feats).endswith("False"))
 
+def i_pron_j_not_pron(feats):
+    """WORKS"""
+    return "i_pron_j_not_pron={}".format(i_pronoun(feats).endswith("True") and
+                                         j_pronoun(feats).endswith("False"))
 
-
-
-
-
-
-    #OTHER VERSION, DIDN'T REMOVE IT JUST IN CASE
-    #def is_j_apposition(curr_tree):
-    #    found = False
-    #    for child in curr_tree:
-    #        if isinstance(child,ParentedTree):
-    #            found = is_j_apposition(child)
-    #            if found:
-    #                break
-    #        else: #a leaf
-    #            if curr_tree.leaves() == feats.j_cleaned.split("_"):
-    #                parent = curr_tree.parent()
-    #                leaf_is_noun = curr_tree.node=="NN" or curr_tree == "NNS"
-    #                if leaf_is_noun:
-    #                    available_elders = isinstance(parent,ParentedTree) and \
-    #                                       isinstance(parent.parent(),ParentedTree)
-    #                    if available_elders:
-    #                        if parent.node== "NP":
-    #                            greatuncle = parent.parent().left_sibling()
-    #                            if isinstance(greatuncle,ParentedTree):
-    #                                previous_words = greatuncle.parent().leaves()
-    #                                meets_constraits = greatuncle.node == "," and i_head in previous_words
-    #                                if meets_constraits:
-    #                                    found = True
-    #            if found:
-    #                break
-    #    return found
-
-
-
+def meet_all_constraints(feats):
+    """WORKS"""
+    gender_agree = gender_agreement(feats).endswith("True") or gender_agreement(feats).endswith("unknown")
+    number_agree = number_agreement(feats).endswith("True")
+    compatible_syntx = compatible_syntax(feats).endswith("True")
+    animacy_agree = animacy_agreement(feats).endswith("True")
+    entity_agree = animacy_agreement(feats).endswith("True")
+    compatible = gender_agree and number_agree and \
+                 compatible_syntx and animacy_agree and entity_agree
+    return "meet_all_constraints={}".format(compatible)
 
 ################
 # Anya's stuff #
@@ -458,7 +513,6 @@ def dist_ten(fs):
     True if the number of sentences b/w the markables is less than or equal to ten, False otherwise.
     """
     distance=int(fs.sentence_ref) - int(fs.sentence)
-    print distance<10
     return "dist_ten={}".format(distance<10)
 
 def i_pronoun(fs):
@@ -594,6 +648,28 @@ def modifier(fs):
 
     return "modifier={}".format(result)
 
+def pro_str(fs):
+    """
+    C if both NPs are pronominal and are the same string.
+    """
+    result=False
+
+    i_pos=__get_pos__(fs.article,fs.sentence,fs.offset_begin,fs.offset_end)
+    j_pos=__get_pos__(fs.article,fs.sentence_ref,fs.offset_begin_ref,fs.offset_end_ref)
+
+    return "pro_str={}".format(i_pos.startswith('PRP') and j_pos.startswith('PRP') and fs.i_cleaned==fs.j_cleaned)
+
+def pn_str(fs):
+    """
+    C if both NPs are proper names and are the same string.
+    """
+    result=False
+
+    i_pos=__get_pos__(fs.article,fs.sentence,fs.offset_begin,fs.offset_end)
+    j_pos=__get_pos__(fs.article,fs.sentence_ref,fs.offset_begin_ref,fs.offset_end_ref)
+
+    return "pro_str={}".format(i_pos.startswith('NNP') and j_pos.startswith('NNP') and fs.i_cleaned==fs.j_cleaned)
+
 def pn_substr(fs):
     """
     C if both NPs are proper names and one NP is a proper substring (w.r.t. content words
@@ -610,6 +686,17 @@ def pn_substr(fs):
 
     return "pn_substr={}".format(result)
 
+def words_str(fs):
+    """
+    C if both NPs are non-pronominal and are the same string.
+    """
+    result=False
+
+    i_pos=__get_pos__(fs.article,fs.sentence,fs.offset_begin,fs.offset_end)
+    j_pos=__get_pos__(fs.article,fs.sentence_ref,fs.offset_begin_ref,fs.offset_end_ref)
+
+    return "words_str={}".format(not i_pos.startswith('PRP') and not j_pos.startswith('PRP') and fs.i_cleaned==fs.j_cleaned)
+
 def words_substr(fs):
     """
     C if both NPs are non-pronominal and one NP is a proper substring (w.r.t. content words
@@ -624,11 +711,16 @@ def words_substr(fs):
         if word_overlap(fs).endswith('True'):
             result=True
 
-    print fs.token, '\t', fs.token_ref
-    print result
-    print
-
     return "words_substr={}".format(result)
+
+def soon_str_nonpro(fs):
+    """
+    C if both NPs are non-pronominal and the string of NP matches that of NP; else I.
+    """
+    i_pos=__get_pos__(fs.article,fs.sentence,fs.offset_begin,fs.offset_end)
+    j_pos=__get_pos__(fs.article,fs.sentence_ref,fs.offset_begin_ref,fs.offset_end_ref)
+
+    return "soon_str_nonpro={}".format(not i_pos.startswith('PRP') and not j_pos.startswith('PRP') and string_match(fs).endswith('True'))
 
 def both_definites(fs):
     """
@@ -681,6 +773,17 @@ def both_pronouns(fs):
     j_pos=__get_pos__(fs.article,fs.sentence_ref,fs.offset_begin_ref,fs.offset_end_ref)
     return "both_pronouns={}".format(i_pos.startswith('PRP') and j_pos.startswith('PRP'))
 
+def contains_pn(fs):
+    """
+    I if both NPs are not proper names but contain proper names that mismatch on every word; else C.
+    """
+    result=False
+
+    i_pos=__get_pos__(fs.article,fs.sentence,fs.offset_begin,fs.offset_end)
+    j_pos=__get_pos__(fs.article,fs.sentence_ref,fs.offset_begin_ref,fs.offset_end_ref)
+
+    if i_pos!='NNP' and j_pos!='NNP':
+        pass
 
 
 
