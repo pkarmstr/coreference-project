@@ -141,31 +141,34 @@ def entity_type_agreement(feats):
 
 def apposition(feats): #this was driving me MAD....I SHOULD CORRECT THE STYLE...aarrrrggghhshs
     """WORKS WITH THE EXAMPLES IN UNITTEST, HOPE THEY WERE NOT A COINDIDENCE"""
-    sentence_tree = TREES_DICTIONARY[feats.article+".raw"][int(feats.sentence_ref)]
-    ptree = ParentedTree.convert(sentence_tree)
-    token_ref = set(feats.token_ref.split("_"))
-    token = set(feats.token.split("_"))
-    def is_j_apposition(curr_tree):
-            found = False
-            for child in curr_tree:
-                if found:
-                    break
-                elif isinstance(child, ParentedTree):
-                    child_leaves = set(child.leaves())
-                    conditions = len(token_ref.intersection(child_leaves))>0 and curr_tree.node == "NP"
-                    if conditions:
-                        brother = child.left_sibling()
-                        if isinstance(brother, ParentedTree) and brother.node == ",":
-                            antecedent = brother.left_sibling()
-                            if isinstance(antecedent,ParentedTree):
-                                previous_words = set(antecedent.leaves())
-                                if len(token.intersection(previous_words))>0:
-                                    found = True
-                    else:
-                        found = is_j_apposition(child)
+    if feats.sentence!=feats.sentence_ref:
+        return "apposition={}".format(False)
+    else:
+        sentence_tree = TREES_DICTIONARY[feats.article+".raw"][int(feats.sentence_ref)]
+        ptree = ParentedTree.convert(sentence_tree)
+        token_ref = set(feats.token_ref.split("_"))
+        token = set(feats.token.split("_"))
+        def is_j_apposition(curr_tree):
+                found = False
+                for child in curr_tree:
+                    if found:
+                        break
+                    elif isinstance(child, ParentedTree):
+                        child_leaves = set(child.leaves())
+                        conditions = len(token_ref.intersection(child_leaves))>0 and curr_tree.node == "NP"
+                        if conditions:
+                            brother = child.left_sibling()
+                            if isinstance(brother, ParentedTree) and brother.node == ",":
+                                antecedent = brother.left_sibling()
+                                if isinstance(antecedent,ParentedTree):
+                                    previous_words = set(antecedent.leaves())
+                                    if len(token.intersection(previous_words))>0:
+                                        found = True
+                        else:
+                            found = is_j_apposition(child)
 
-            return found
-    return "apposition={}".format(is_j_apposition(ptree))
+                return found
+        return "apposition={}".format(is_j_apposition(ptree))
 
 
 #ANYA'S FUNCTION :)
@@ -269,6 +272,7 @@ def animacy_agreement(feats):
     both_not_people = feats.entity_type != "PER" and feats.entity_type_ref != "PER"
     return "animacy_agreement={}".format(both_people or both_not_people)
 
+
 def same_max_NP(feats):
     if feats.sentence !=  feats.sentence_ref:
         return "same_max_NP={}".format(False)
@@ -283,7 +287,6 @@ def same_max_NP(feats):
         return "same_max_NP={}".format(max_p_i == max_p_j and both_NPs)
 
 
-
 def __get_max_projection__(bigger_tree,target_tree):
     max_p = None
     for child in bigger_tree:
@@ -295,7 +298,6 @@ def __get_max_projection__(bigger_tree,target_tree):
             else:
                 max_p = __get_max_projection__(child,target_tree)
     return max_p
-
 
 
 def is_pred_nominal(feats):
@@ -359,6 +361,33 @@ def could_be_coindexed(feats):
                 return "could_be_coindexed={}".format(False)
 
         return "could_be_coindexed={}".format(True)
+
+
+def compatible_syntax(feats):
+    compatible = could_be_coindexed(feats).endswith("True") and span(feats).endswith("False")
+    return "compatible_syntax={}".format(compatible)
+
+def j_indefinite(feats):
+    "j is not definite but it isn't an apposition either"
+    return "j_indefinite={}".format(def_np(feats).endswith("False") and
+                                    apposition(feats).endswith("false"))
+
+def i_pron_j_not_pron(feats):
+    return "i_pron_j_not_pron={}".format(i_pronoun(feats).endswith("True") and
+                                         j_pronoun(feats).endswith("False"))
+
+def meet_all_constraints(feats):
+    gender_agree = gender_agreement(feats).endswith("True") or gender_agreement(feats).endswith("unknown")
+    number_agree = number_agreement(feats).endswith("True")
+    compatible_syntx = compatible_syntax(feats).endswith("True")
+    animacy_agree = animacy_agreement(feats).endswith("True")
+    entity_agree = animacy_agreement(feats).endswith("True")
+    compatible = gender_agree and number_agree and compatible_syntx and animacy_agree
+    return "meet_all_constraints={}".format(compatible)
+
+
+
+
 
 
 

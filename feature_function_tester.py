@@ -96,8 +96,11 @@ class FeatureTest(unittest.TestCase):
         feats1 = FeatureRow(*line1)
         line2 = "NYT20001020.2025.0304.head.coref 31 1 3 PER Howard_Klein 31 6 7 PER broker Howard_Klein broker yes".rstrip().split()
         feats2 = FeatureRow(*line2)
+        line3 = "NYT20001027.1622.0218.head.coref 8 12 13 PER spokesman 8 14 16 PER Mark_Murray spokesman Mark_Murray yes".rstrip().split()
+        feats3 = FeatureRow(*line3)
         self.assertEqual(apposition(feats1).endswith("True"),True)
         self.assertEqual(apposition(feats2).endswith("True"),True)
+        self.assertEqual(apposition(feats3).endswith("True"),True)
 
     def test__is_subject__(self):
         line1 = "NYT20001102.1839.0338.head.coref 9 16 17 PER he 18 7 8 ORG itself he itself no".rstrip().split()
