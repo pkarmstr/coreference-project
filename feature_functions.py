@@ -245,7 +245,7 @@ def __is_subject__(curr_tree,token, parent):
 
 
 def i_is_subject(feats):
-    sentence_tree = TREES_DICTIONARY[feats.article+".raw"][int(feats.sentence_ref)]
+    sentence_tree = TREES_DICTIONARY[feats.article+".raw"][int(feats.sentence)]
     ptree = ParentedTree.convert(sentence_tree)
     parent = __get_parent_tree__(feats.token, ptree)
     i_subject = __is_subject__(ptree,feats.token)
