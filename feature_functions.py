@@ -204,6 +204,7 @@ def __get_parent_tree__(unclean_token, t):
     else:
         position_tuple=t.leaf_treeposition(start)
 
+    #if a phrase spans an entire NP, we want to just return that NP instead of going one level up
     if not isinstance(t[position_tuple],str) and t[position_tuple].node.endswith('P') and \
                     t[position_tuple].node!='PRP' and t[position_tuple].node!='NNP':
         parent_tree=t[position_tuple]
