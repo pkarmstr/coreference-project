@@ -155,14 +155,6 @@ class FeatureTest(unittest.TestCase):
         self.assertEqual(is_pred_nominal(feats2).endswith("False"),True)
 
 
-    def test_condition_B_met(self):
-        line1 = "NYT20001102.1839.0340.head.coref 17 7 8 PER him 17 3 4 PER who him who no".rstrip().split()
-        feats1 = FeatureRow(*line1)
-        tree1_i = ParentedTree.convert(TREES_DICTIONARY[feats1.article+".raw"][int(feats1.sentence)])
-        #print condition_B_met(feats1)
-
-
-
     def test_def_np(self):
         line1 = "NYT20001111.1247.0093.head.coref 7 13 14 LOC area 13 5 6 PER they area they no".rstrip().split()
         line2 = "APW20001110.1844.0453.head.coref 6 7 8 PER witness 4 14 15 PER Jewish witness Jewish no".rstrip().split()
