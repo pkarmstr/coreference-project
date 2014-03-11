@@ -1,8 +1,11 @@
-from file_reader import TREES_DICTIONARY, POS_DICTIONARY, RAW_DICTIONARY, PRONOUN_LIST, NONCONTENT_SET, FeatureRow
+from __future__ import division
+from file_reader import TREES_DICTIONARY, POS_DICTIONARY, RAW_DICTIONARY, PRONOUN_LIST, NONCONTENT_SET, TITLE_SET, FeatureRow
 import re, os, nltk
 from nltk.corpus import names
 from nltk.corpus import wordnet as wn
 from nltk.tree import ParentedTree
+from nltk.corpus import wordnet as wn
+from math import ceil
 
 ###############
 # basic stuff #
@@ -739,6 +742,17 @@ def both_definites(fs):
 
     return "both_definites={}".format(i_def and j_def)
 
+def definite_1(fs):
+    """
+    Y if NP1 starts with the; else N.
+    """
+
+    parent_i = __get_parent_tree__(fs.token,TREES_DICTIONARY[fs.article+".raw"][int(fs.sentence)])
+
+    i_def=parent_i.node=='NP' and parent_i.leaves()[0].lower()=='the'
+
+    return "definite_1={}".format(i_def)
+
 def both_embedded(fs):
     """
     C if both NPs are prenominal modifiers.
@@ -770,6 +784,48 @@ def both_embedded(fs):
         q+=1
 
     return "both_embedded={}".format(i_embedded and j_embedded)
+
+def embedded_1(fs):
+    """
+    C if the first NP is a prenominal modifier.
+    Approach:
+        - look at 2 tokens ahead of i and see if either of them are nouns (the tree approach didn't work)
+    """
+    i_embedded=False
+
+    sent_i=POS_DICTIONARY[fs.article +".raw"][int(fs.sentence)]
+
+    #see if there is a noun within 2 words after i
+    p=int(fs.offset_end)
+
+    while p<int(fs.offset_end)+2 and p<len(sent_i) and i_embedded==False:
+
+        if sent_i[p][-1].startswith('NN'):
+            i_embedded=True
+        p+=1
+
+    return "embedded_1={}".format(i_embedded)
+
+def embedded_2(fs):
+    """
+    C if the second NP is a prenominal modifier.
+    Approach:
+        - look at 2 tokens ahead of j and see if either of them are nouns (the tree approach didn't work)
+    """
+    j_embedded=False
+
+    sent_j=POS_DICTIONARY[fs.article +".raw"][int(fs.sentence_ref)]
+
+    #see if there is a noun within 2 words after j
+    p=int(fs.offset_end_ref)
+
+    while p<int(fs.offset_end_ref)+2 and p<len(sent_j) and j_embedded==False:
+
+        if sent_j[p][-1].startswith('NN'):
+            j_embedded=True
+        p+=1
+
+    return "embedded_2={}".format(j_embedded)
 
 def both_pronouns(fs):
     """C if both markables are pronouns"""
@@ -839,7 +895,60 @@ def contains_pn(fs):
     #print
     return "contains_pn={}".format(result)
 
+def proper_noun(fs):
+    """
+    I if both NPs are proper names, but mismatch on every word; else C.
+    """
+    i_pos=__get_pos__(fs.article,fs.sentence,fs.offset_begin,fs.offset_end)
+    j_pos=__get_pos__(fs.article,fs.sentence_ref,fs.offset_begin_ref,fs.offset_end_ref)
+    return "proper_noun={}".format(i_pos.startswith('NNP') and j_pos.startswith('NNP') and string_match(fs).endswith('False'))
 
+def title(fs):
+    """
+    I if one or both of the NPs is a title; else C.
+    """
+    return "title={}".format(fs.i_cleaned in TITLE_SET or fs.j_cleaned in TITLE_SET)
+
+def title_per(fs):
+    """
+    True if one is a title and the other is a person.
+    """
+    result=(fs.i_cleaned in TITLE_SET and fs.entity_type_ref=='PER') or (fs.j_cleaned in TITLE_SET and fs.entity_type=='PER')
+    return "title_per={}".format(result)
+
+def wndist(fs):
+    """
+    Distance between NP1 and NP2 in WordNet (using the first sense only)
+    """
+
+    wndist=-100000
+
+    i_pos=__get_pos__(fs.article,fs.sentence,fs.offset_begin,fs.offset_end)
+    j_pos=__get_pos__(fs.article,fs.sentence_ref,fs.offset_begin_ref,fs.offset_end_ref)
+
+    #print "Orig:", fs.token, '\t', fs.token_ref
+
+    if i_pos.startswith('NN') and j_pos.startswith('NN') and not i_pos.endswith('P') and not j_pos.endswith('P'):
+        # considering only common nouns
+        lemmatizer = nltk.WordNetLemmatizer()
+        i=lemmatizer.lemmatize(fs.i_cleaned, pos='n')
+        j=lemmatizer.lemmatize(fs.j_cleaned, pos='n')
+        synsets_i=wn.synsets(i)
+        synsets_j=wn.synsets(j)
+        if len(synsets_i)>0 and len(synsets_j)>0:
+            wn_sense1_i=synsets_i[0]
+            wn_sense1_j=synsets_j[0]
+            wn_pos_i=str(wn_sense1_i).split('.')[1]
+            wn_pos_j=str(wn_sense1_j).split('.')[1]
+            if wn_pos_i==wn_pos_j:
+                wndist=wn_sense1_i.lch_similarity(wn_sense1_j)
+                wndist=(ceil(wndist * 100) / 100.0)
+                #print "Lemmatized:", i, '\t', j, '\t', str(wndist)
+
+    #print
+    #print
+
+    return "wndist={}".format(wndist)
 
 
 
