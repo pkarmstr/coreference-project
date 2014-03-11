@@ -337,7 +337,10 @@ def same_max_NP(feats):
         parent2 = __get_parent_tree__(feats.token_ref, ptree)
         max_p_i = __get_max_projection__(ptree,parent1)
         max_p_j = __get_max_projection__(ptree, parent2)
-        both_NPs = max_p_i.node == "NP" and max_p_j.node == "NP"
+        if max_p_i is not None and max_p_j is not None:
+            both_NPs = max_p_i.node == "NP" and max_p_j.node == "NP"
+        else:
+            both_NPs = False
         return "same_max_NP={}".format(max_p_i == max_p_j and both_NPs)
 
 
@@ -774,18 +777,67 @@ def both_pronouns(fs):
     j_pos=__get_pos__(fs.article,fs.sentence_ref,fs.offset_begin_ref,fs.offset_end_ref)
     return "both_pronouns={}".format(i_pos.startswith('PRP') and j_pos.startswith('PRP'))
 
+def __pos_by_index__(fname,sent_num,start_index):
+    """from Anya, just changed the +.raw part. WORKS"""
+    fname += ".raw"
+    sent_num=int(sent_num)
+    start_index=int(start_index)
+    sent=POS_DICTIONARY[fname][sent_num]
+    if start_index < len(sent):
+        word=sent[start_index]
+        pos=word[1]
+    else:
+        pos="none"
+    return pos
+
 def contains_pn(fs):
     """
     I if both NPs are not proper names but contain proper names that mismatch on every word; else C.
     """
     result=False
 
+    #print fs.token, '\t', fs.token_ref
+
     i_pos=__get_pos__(fs.article,fs.sentence,fs.offset_begin,fs.offset_end)
     j_pos=__get_pos__(fs.article,fs.sentence_ref,fs.offset_begin_ref,fs.offset_end_ref)
 
-    if i_pos!='NNP' and j_pos!='NNP':
-        pass
+    if i_pos!='NNP' or j_pos!='NNP':
+        parent_i = __get_parent_tree__(fs.token,TREES_DICTIONARY[fs.article+".raw"][int(fs.sentence)])
+        parent_j = __get_parent_tree__(fs.token_ref,TREES_DICTIONARY[fs.article+".raw"][int(fs.sentence_ref)])
+        #print parent_i.__repr__()
+        #print parent_j.__repr__()
+        leaves_i=parent_i.leaves()
+        leaves_j=parent_j.leaves()
 
+        i_NNP=[] #collect all the proper names in NPi
+        for word in leaves_i:
+            start_index_i = leaves_i.index(word)
+            #pos=__pos_by_index__(fs.article,fs.sentence,start_index_i)
+            pos=parent_i[parent_i.leaf_treeposition(start_index_i)[:-1]].node
+            #print word, '\t', pos
+            if pos.startswith('NNP'):
+                i_NNP.append(word)
+        i_NNP=set(i_NNP)
+
+        j_NNP=[] #collect all the proper names in NPj
+        #print "============="
+        for word in leaves_j:
+            start_index_j = leaves_j.index(word)
+            #pos=__pos_by_index__(fs.article,fs.sentence_ref,start_index_j)
+            pos=parent_j[parent_j.leaf_treeposition(start_index_j)[:-1]].node
+            #print word, '\t', pos
+            if pos.startswith('NNP'):
+                j_NNP.append(word)
+        j_NNP=set(j_NNP)
+
+        #if two sets of proper names do not overlap (i.e. mismatch on every word)
+        if len(i_NNP)>0 and len(j_NNP)>0 and len(i_NNP.intersection(j_NNP))<1:
+            result=True
+
+    #print result
+    #print
+    #print
+    return "contains_pn={}".format(result)
 
 
 
