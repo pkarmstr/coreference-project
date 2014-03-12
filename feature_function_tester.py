@@ -5,7 +5,7 @@ from feature_functions import *
 from feature_functions import __determine_number__, __determine_gender__
 from file_reader import RAW_DICTIONARY, POS_DICTIONARY, TREES_DICTIONARY, PRONOUN_LIST
 from feature_functions import __determine_number__, __determine_gender__, __is_subject__, __get_parent_tree__, \
-    __pos_match__, def_np, def_np_pos_match
+    __pos_match__, def_np, def_np_pos_match, __get_sem_class__
 from file_reader import RAW_DICTIONARY, POS_DICTIONARY, TREES_DICTIONARY, PRONOUN_LIST, FeatureRow
 
 class FeatureTest(unittest.TestCase):
@@ -150,7 +150,6 @@ class FeatureTest(unittest.TestCase):
         self.assertEqual(none_is_subject(feats1).endswith("True"),True)
 
 
-
     def test_animacy_agreement(self):
         line1 = "NYT20001111.1247.0093.head.coref 9 27 29 LOC West_Bank 21 0 1 PER Mohtaseb West_Bank Mohtaseb no".rstrip().split()
         feats1 = FeatureRow(*line1)
@@ -248,6 +247,47 @@ class FeatureTest(unittest.TestCase):
         self.assertEqual(meet_all_constraints(feats2).endswith("True"),True)
         self.assertEqual(meet_all_constraints(feats3).endswith("True"),True)
         self.assertEqual(meet_all_constraints(feats4).endswith("True"),True)
+
+    def test_closest_comp(self):
+        line1 = "NYT20001019.2136.0319.head.coref 8 7 8 PER Letterman 8 0 3 PER George_W._Bush Letterman George_W._Bush no".rstrip().split()
+        feats1 = FeatureRow(*line1)
+        line2 = "NYT20001019.2136.0319.head.coref 8 7 8 PER Letterman 9 0 1 PER He Letterman he yes".rstrip().split()
+        feats2 = FeatureRow(*line2)
+        self.assertEqual(closest_comp(feats1).endswith("False"), True)
+        self.assertEqual(closest_comp(feats2).endswith("False"), True)
+
+    def test__get_sem_class__(self):
+        self.assertEqual(__get_sem_class__("Obama") == "PER", True)
+        self.assertEqual(__get_sem_class__("anyone")=="PER", True)
+        self.assertEqual(__get_sem_class__("America")=="GPE", True)
+        self.assertEqual(__get_sem_class__("warship")=="VEH", True)
+
+    def test_nominative_case(self):
+        line1 = "NYT20001023.2203.0479.head.coref 6 5 8 PER George_W._Bush 26 30 31 PER her George_W._Bush her no".rstrip().split()
+        feats1 = FeatureRow(*line1)
+        self.assertEqual(nominative_case(feats1).endswith("she"), True)
+
+    def test_number_composite(self):
+        line1 = "NYT20001111.1247.0093.head.coref 13 5 6 PER they 15 12 13 WEA rifles they rifles no".rstrip().split()
+        feats1=FeatureRow(*line1)
+        self.assertEqual(number_composite(feats1).endswith("plural-plural"), True)
+
+    def test_gender_composite(self):
+        line1 = "NYT20001023.2203.0479.head.coref 6 5 8 PER George_W._Bush 26 30 31 PER her George_W._Bush her no".rstrip().split()
+        feats1 = FeatureRow(*line1)
+        self.assertEqual(gender_composite(feats1).endswith("male-female"), True)
+
+    def test_entity_composite(self):
+        line1 = "NYT20001020.2144.0366.head.coref 12 24 25 PER she 13 0 1 ORG Associates she Associates no".rstrip().split()
+        feats1 = FeatureRow(*line1)
+        self.assertEqual(entity_composite(feats1).endswith("PER-ORG"), True)
+
+
+
+
+
+
+
 
 
 

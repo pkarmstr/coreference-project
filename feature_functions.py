@@ -2,7 +2,17 @@ from file_reader import TREES_DICTIONARY, POS_DICTIONARY, RAW_DICTIONARY, PRONOU
 import re, os, nltk
 from nltk.corpus import names
 from nltk.corpus import wordnet as wn
+from nltk.corpus.reader.wordnet import WordNetError as wn_error
 from nltk.tree import ParentedTree
+
+#SEM_CLASSES = {wn.synset('person.n.01'):"PER", wn.synset('location.n.01'):"LOC", wn.synset('organization.n.01'):"ORG",
+#               wn.synset('date.n.01'):"DATE", wn.synset('time_unit.n.01'):"TIME", wn.synset('money.n.01'):"MONEY",
+#               wn.synset('percent.n.01'):"PERCENT", wn.synset('object.n.01'):"OBJECT"}
+
+SEM_CLASSES = {wn.synset('person.n.01'):"PER", wn.synset('district.n.01'):"GPE",
+               wn.synset('location.n.01'):"LOC", wn.synset('organization.n.01'):"ORG",
+               wn.synset('vehicle.n.01'):"VEH", wn.synset('structure.n.01'):"FAC"}
+
 
 ###############
 # basic stuff #
@@ -12,8 +22,8 @@ def is_coreferent(fs):
     return fs.is_referent
 
 #################
-# julia's stuff #
-#################
+# julia's stuff #x.j
+#################yhyhy
 
 def dem_token(feats):
     """WORKS!"""
@@ -134,12 +144,38 @@ def alias(feats):
     return "alias={}".format(alias)
 
 
+def i_entity_type__(feats):
+    return "i_entity_type={}".format(feats.entity_type)
+
+def j_entity_type__(feats):
+    return "j_entity_type_={}".format(feats.entity_type_ref)
+
+
 def entity_type_agreement(feats):
     ##intuition similar to sem_class agreement (not implemented)
     """WORKS"""
     i_entity_type = feats.entity_type
     j_entity_type = feats.entity_type_ref
     return "entity_type_agreement={}".format(i_entity_type == j_entity_type)
+
+
+def number_composite(feats):
+    i_number = __determine_number__(feats.article,feats.sentence, feats.token,
+                                feats.offset_begin,feats.offset_end)
+    j_number= __determine_number__(feats.article, feats.sentence_ref, feats.token_ref,
+                               feats.offset_begin_ref,feats.offset_end_ref)
+    return "number_composite={}".format(i_number +"-"+j_number)
+
+
+def gender_composite(feats):
+    i_gender = __determine_gender__(feats.article, feats.sentence, feats.i_cleaned,
+                                feats.offset_begin, feats.offset_end, feats.entity_type)
+    j_gender=__determine_gender__(feats.article, feats.sentence_ref, feats.j_cleaned,
+                              feats.offset_begin_ref,feats.offset_end_ref, feats.entity_type_ref)
+    return "gender_composite={}".format(i_gender + "-" + j_gender)
+
+def entity_composite(feats):
+    return "entity_composite={}".format(feats.entity_type + "-" + feats.entity_type_ref)
 
 
 
@@ -406,6 +442,109 @@ def meet_all_constraints(feats):
                  compatible_syntx and animacy_agree and entity_agree
 
     return "meet_all_constraints={}".format(compatible)
+
+
+def closest_comp(feats):
+    closest = True
+    
+    ##Find which one comes first in the paragraph
+    later_one = _later_markable(feats)
+    if later_one == "j":
+        first_instance = (feats.token, feats.sentence,
+                          feats.offset_end, feats.entity_type)
+        later_instance = (feats.token_ref, feats.sentence_ref,
+                          feats.offset_begin_ref, feats.entity_type_ref)
+    else:
+        first_instance = (feats.token_ref, feats.sentence_ref,
+                          feats.offset_end_ref, feats.entity_type_ref)
+        later_instance = (feats.token, feats.sentence,
+                          feats.offset_begin, feats.entity_type)
+    
+    #Check compatibillity values
+    if entity_type_agreement(feats).endswith("True") and \
+            compatible_syntax(feats).endswith("True"):
+
+
+        # Occur in same sentence, check for closest NP candidates 
+        if first_instance[1] == later_instance[1]: #same sentence
+            sentence = POS_DICTIONARY[feats.article+".raw"][int(later_instance[1])]
+            candidate_antecedents = sentence[int(first_instance[2]):int(later_instance[2])]
+        
+        #Occur in different sentences: Check for NPs before j and between i that could be
+        #candidates in other sentences inbetween
+        else:
+            candidate_antecedents = _get_inbetween_words__(feats,first_instance[1],later_instance[1],
+                                                          first_instance[2],later_instance[2])
+
+        candidate_antecedents.reverse()
+        #check closer NP (reverse list) for compatibility. If one is found,
+        #then i is not the closest compatible one.
+        for c,tag in candidate_antecedents:
+            ok_tags = ["NNP", "NNS", "NN", "PRP", "PRP$"]
+            if tag in ok_tags:
+                c_sem_class = __get_sem_class__(c)
+                if c_sem_class == later_instance[3]: #entity of NP2
+                    closest = False
+                    break
+
+    return "closes_comp={}".format(closest)
+
+
+def _get_inbetween_words__(feats, first_sentence_offset, later_sentence_offset, i_offset_end, j_offset_begin):
+    """Watch out, i and j correspond to former and later tokens, not to feats.token and feats.token_ref:
+    the first occurring in the text is i, the latter is j"""
+    words_inbetween = POS_DICTIONARY[feats.article+".raw"][int(first_sentence_offset)][int(i_offset_end):]
+    until_j = POS_DICTIONARY[feats.article+".raw"][int(later_sentence_offset)][:int(j_offset_begin)]
+    if int(first_sentence_offset) != int(later_sentence_offset) + 1: #there is at least a sentence inbetween the two sents.
+        middle_sentences = POS_DICTIONARY[feats.article+".raw"][int(first_sentence_offset)+1:int(later_sentence_offset)]
+        middle_tokens = []
+        for s in middle_sentences:
+            middle_tokens.extend([l for l in s])
+        middle_tokens.extend(until_j)
+        words_inbetween.extend(middle_tokens)
+    else: #i sentences precedes j sentence (difference of 1)
+        words_inbetween.extend(until_j)
+    return words_inbetween
+
+
+def __get_sem_class__(token):
+    token = re.sub(r'[`]','',token)
+    per_pronouns = ["she", "he", "they", "you", "we",
+                    "i", "them", "her", "him", "us", "who","whom"]
+    if token.lower() in per_pronouns:
+        sem_class = "PER"
+    else:
+        sem_class = "PER" #it will crash with NNP that are not GPE, so probably people
+        try:
+            token_clean = wn.morphy(token.lower(), wn.NOUN)
+            token_sense = ""+token_clean+".n.01"
+            token_synset = wn.synset(token_sense)
+            for synset in SEM_CLASSES.keys():
+                hypernyms = token_synset.hypernyms()
+                if len(hypernyms) == 0: #need to get the instance
+                    token_synset = token_synset.instance_hypernyms()[0]
+
+                if synset in token_synset.common_hypernyms(synset):
+                    sem_class = SEM_CLASSES[synset]
+                    break
+                else:
+                    sem_class = "OTHER"
+        except:
+            wn_error
+    return sem_class
+
+
+def nominative_case(feats):
+    if j_pronoun(feats).endswith("True"):
+        nc = {"him":"he", "her":"she",
+          "them":"they", "us":"we"}
+        token = feats.token_ref.lower()
+        if token in nc.keys():
+            return "nominative_case={}".format(nc[token])
+        else:
+            return "nominative_case={}".format(token)
+    else:
+        return "nominative_case={unapplicable}"
 
 
 
