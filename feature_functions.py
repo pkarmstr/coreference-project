@@ -3,6 +3,7 @@ import re, os, nltk
 from nltk.corpus import names
 from nltk.corpus import wordnet as wn
 from nltk.tree import ParentedTree
+import difflib
 
 ###############
 # basic stuff #
@@ -681,14 +682,16 @@ def both_pronouns(fs):
 
 def rule_resolve(fs):
     dcoref = COREF_DICTIONARY[fs.article]
-    found_i = False
-    found_j = False
     for group in dcoref:
+        found_i = False
+        found_j = False
         for referent in group:
             if _rule_resolve_helper(referent, fs.sentence, fs.offset_end, fs.offset_end):
+                print referent, fs.token, fs.offset_begin, fs.offset_end, "i"
                 found_i = True
 
             if _rule_resolve_helper(referent, fs.sentence_ref, fs.offset_begin_ref, fs.offset_end_ref):
+                print referent, fs.token_ref, fs.offset_begin_ref, fs.offset_end_ref, "j"
                 found_j = True
 
             if found_i and found_j:
@@ -698,5 +701,5 @@ def rule_resolve(fs):
 
 def _rule_resolve_helper(i, sentence, offset_begin, offset_end):
     return i[1] == sentence and \
-           i[2]-2 < offset_begin < i[2]+3and \
-           i[3]-2 < offset_end < i[3]+3
+           i[2]-2 <= offset_begin <= i[2]+2 and \
+           i[3]-2 <= offset_end <= i[3]+2
