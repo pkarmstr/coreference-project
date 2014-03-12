@@ -184,6 +184,10 @@ class FeatureTest(unittest.TestCase):
         self.assertEqual(word_overlap(fs1).endswith("False"),True)
         self.assertEqual(word_overlap(fs2).endswith("False"),True)
 
+    def test_rule_resole(self):
+        fs1 = FeatureRow("APW20001001.2021.0521.head.coref", 4, 26, 27, "GPE", "Egyptian", 22, 10, 11, "GPE", "Egypt", "", "", "yes")
+        self.assertTrue(rule_resolve(fs1).endswith("True"))
+
 if __name__ == "__main__":
     unittest.main()
 

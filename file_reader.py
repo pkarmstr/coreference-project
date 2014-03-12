@@ -5,6 +5,7 @@ import re
 from collections import namedtuple
 from nltk.corpus import BracketParseCorpusReader
 from build_raw_sentences import pos_split
+from corenlp import parse_parser_xml_results
 
 
 def tree_reader():
@@ -57,6 +58,32 @@ def noncontent_reader():
             ls.append(line.rstrip())
     return set(ls)
 
+def dcoref_opener(file_path, fname):
+    with open(os.path.join(file_path, fname+".raw.xml"), "r") as f_in:
+        nlp = parse_parser_xml_results(f_in.read())
+        all_coref_groups = []
+        for group in nlp["coref"]:
+            chain = set()
+            for pair in group:
+                for i in pair:
+                    chain.add((i[0], i[1], i[3], i[4]))
+            all_coref_groups.append(chain)
+        return all_coref_groups
+
+class LazyDict:
+
+    def __init__(self, file_path, opener):
+        self.d = {}
+        self.file_path = file_path
+        self.opener = opener
+
+    def __getitem__(self, item):
+        try:
+            return self.d[item]
+        except KeyError:
+            self.d[item] = self.opener(self.file_path, item)
+            return self.d[item]
+
 FeatureRow = namedtuple("FeatureRow", ["article", "sentence", "offset_begin",
                                         "offset_end", "entity_type", "token",
                                         "sentence_ref", "offset_begin_ref",
@@ -73,3 +100,4 @@ POS_DICTIONARY = pos_reader()
 TREES_DICTIONARY = tree_reader()
 PRONOUN_LIST = pronoun_reader()
 NONCONTENT_SET = noncontent_reader()
+COREF_DICTIONARY = LazyDict("/home/keelan/stanford-full-pipeline", dcoref_opener)

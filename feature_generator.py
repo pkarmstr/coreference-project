@@ -1,5 +1,5 @@
 """Lasciate ogne speranza, voi ch'intrate"""
-import sys
+from feature_functions import *
 
 __author__ = 'keelan'
 
@@ -19,9 +19,10 @@ class Featurizer:
         self.file_path = file_path
         self.feature_functions = features
         self.no_tag = no_tag
+        self.original_data = self.get_original_data()
 
-    @property
-    def original_data(self):
+
+    def get_original_data(self):
         gold_data = []
         with codecs.open(self.file_path, "r") as f_in:
             for line in f_in:

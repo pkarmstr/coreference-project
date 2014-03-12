@@ -1,4 +1,4 @@
-from file_reader import TREES_DICTIONARY, POS_DICTIONARY, RAW_DICTIONARY, PRONOUN_LIST, NONCONTENT_SET, FeatureRow
+from file_reader import TREES_DICTIONARY, POS_DICTIONARY, RAW_DICTIONARY, PRONOUN_LIST, NONCONTENT_SET, COREF_DICTIONARY, FeatureRow
 import re, os, nltk
 from nltk.corpus import names
 from nltk.corpus import wordnet as wn
@@ -675,17 +675,28 @@ def both_pronouns(fs):
     j_pos=__get_pos__(fs.article,fs.sentence_ref,fs.offset_begin_ref,fs.offset_end_ref)
     return "both_pronouns={}".format(i_pos.startswith('PRP') and j_pos.startswith('PRP'))
 
+##################
+# keelan's stuff #
+##################
 
+def rule_resolve(fs):
+    dcoref = COREF_DICTIONARY[fs.article]
+    found_i = False
+    found_j = False
+    for group in dcoref:
+        for referent in group:
+            if _rule_resolve_helper(referent, fs.sentence, fs.offset_end, fs.offset_end):
+                found_i = True
 
+            if _rule_resolve_helper(referent, fs.sentence_ref, fs.offset_begin_ref, fs.offset_end_ref):
+                found_j = True
 
+            if found_i and found_j:
+                return "rule_resolve=True"
 
+    return "rule_resolve=False"
 
-
-
-
-
-
-
-
-
-
+def _rule_resolve_helper(i, sentence, offset_begin, offset_end):
+    return i[1] == sentence and \
+           i[2]-2 < offset_begin  and \
+           offset_end < i[3]+3
