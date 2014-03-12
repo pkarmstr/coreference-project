@@ -698,5 +698,5 @@ def rule_resolve(fs):
 
 def _rule_resolve_helper(i, sentence, offset_begin, offset_end):
     return i[1] == sentence and \
-           i[2]-2 < offset_begin  and \
-           offset_end < i[3]+3
+           i[2]-2 < offset_begin < i[2]+3and \
+           i[3]-2 < offset_end < i[3]+3
