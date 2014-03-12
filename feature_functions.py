@@ -179,6 +179,7 @@ def apposition(feats): #this was driving me MAD....I SHOULD CORRECT THE STYLE...
 def __get_parent_tree__(unclean_token, t):
     """
     Given a token, returns the subtree that dominates that token in the corresponding parse tree.
+    (Goes one level up from the POS)
     """
     words = unclean_token.split('_')
     leaf_indices=[]
@@ -203,12 +204,21 @@ def __get_parent_tree__(unclean_token, t):
     else:
         position_tuple=t.leaf_treeposition(start)
 
-    parent_tree=t[position_tuple[:-2]]
+    #if a phrase spans an entire NP, we want to just return that NP instead of going one level up
+    if not isinstance(t[position_tuple],str) and t[position_tuple].node.endswith('P') and \
+                    t[position_tuple].node!='PRP' and t[position_tuple].node!='NNP':
+        parent_tree=t[position_tuple]
+
+    else:
+        parent_tree=t[position_tuple[:-2]]
+
     return parent_tree
 
 
-
 def __get_max_projection__(bigger_tree,target_tree):
+    """this actually only returns the parent of the target tree.
+     The get_parent functions is used for tokens, this one is for subtrees
+    """
     max_p = None
     for child in bigger_tree:
         if isinstance(max_p, ParentedTree):
@@ -244,27 +254,6 @@ def __is_subject__(curr_tree,token, parent, sentence_tree):
         if found:
             break
     return found
-
-    ######FOR PREVIOUS FUNCTION, WITHOUT THE GIVEN PARENT
-    ##found = False
-    #for child in curr_tree:
-    #    if isinstance(child, ParentedTree):
-    #        conditions = token in "_".join(child.leaves()) and curr_tree.node == "NP"
-    #        if conditions:
-    #            left_brother = curr_tree.left_sibling()
-    #            right_brother = curr_tree.right_sibling()
-    #            if isinstance(left_brother, ParentedTree): #SOV
-    #                if left_brother.node == "VP":
-    #                    found = True
-    #            if isinstance(right_brother,ParentedTree): #OVS
-    #                if right_brother.node == "VP":
-    #                    found = True
-    #        else:
-    #            found = __is_subject__(child,token)
-    #    if found:
-    #        break
-    #return found
-
 
 
 def i_is_subject(feats):
@@ -310,9 +299,14 @@ def same_max_NP(feats):
         ptree = ParentedTree.convert(sentence_tree)
         parent1 = __get_parent_tree__(feats.token, ptree)
         parent2 = __get_parent_tree__(feats.token_ref, ptree)
+        #print "parent of: ", feats.token, ":", parent1
+        #print "parent of: ", feats.token_ref, ":", parent2
         max_p_i = __get_max_projection__(ptree,parent1)
         max_p_j = __get_max_projection__(ptree, parent2)
-        both_NPs = max_p_i.node == "NP" and max_p_j.node == "NP"
+        if max_p_i is not None and max_p_j is not None:
+            both_NPs = max_p_i.node == "NP" and max_p_j.node == "NP"
+        else:
+            both_NPs = False
         return "same_max_NP={}".format(max_p_i == max_p_j and both_NPs)
 
 
@@ -410,53 +404,8 @@ def meet_all_constraints(feats):
     entity_agree = animacy_agreement(feats).endswith("True")
     compatible = gender_agree and number_agree and \
                  compatible_syntx and animacy_agree and entity_agree
+
     return "meet_all_constraints={}".format(compatible)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    #OTHER VERSION, DIDN'T REMOVE IT JUST IN CASE
-    #def is_j_apposition(curr_tree):
-    #    found = False
-    #    for child in curr_tree:
-    #        if isinstance(child,ParentedTree):
-    #            found = is_j_apposition(child)
-    #            if found:
-    #                break
-    #        else: #a leaf
-    #            if curr_tree.leaves() == feats.j_cleaned.split("_"):
-    #                parent = curr_tree.parent()
-    #                leaf_is_noun = curr_tree.node=="NN" or curr_tree == "NNS"
-    #                if leaf_is_noun:
-    #                    available_elders = isinstance(parent,ParentedTree) and \
-    #                                       isinstance(parent.parent(),ParentedTree)
-    #                    if available_elders:
-    #                        if parent.node== "NP":
-    #                            greatuncle = parent.parent().left_sibling()
-    #                            if isinstance(greatuncle,ParentedTree):
-    #                                previous_words = greatuncle.parent().leaves()
-    #                                meets_constraits = greatuncle.node == "," and i_head in previous_words
-    #                                if meets_constraits:
-    #                                    found = True
-    #            if found:
-    #                break
-    #    return found
-
 
 
 
@@ -755,7 +704,54 @@ def both_pronouns(fs):
     j_pos=__get_pos__(fs.article,fs.sentence_ref,fs.offset_begin_ref,fs.offset_end_ref)
     return "both_pronouns={}".format(i_pos.startswith('PRP') and j_pos.startswith('PRP'))
 
+def contains_pn(fs):
+    """
+    I if both NPs are not proper names but contain proper names that mismatch on every word; else C.
+    """
+    result=False
 
+    #print fs.token, '\t', fs.token_ref
+
+    i_pos=__get_pos__(fs.article,fs.sentence,fs.offset_begin,fs.offset_end)
+    j_pos=__get_pos__(fs.article,fs.sentence_ref,fs.offset_begin_ref,fs.offset_end_ref)
+
+    if i_pos!='NNP' or j_pos!='NNP':
+        parent_i = __get_parent_tree__(fs.token,TREES_DICTIONARY[fs.article+".raw"][int(fs.sentence)])
+        parent_j = __get_parent_tree__(fs.token_ref,TREES_DICTIONARY[fs.article+".raw"][int(fs.sentence_ref)])
+        #print parent_i.__repr__()
+        #print parent_j.__repr__()
+        leaves_i=parent_i.leaves()
+        leaves_j=parent_j.leaves()
+
+        i_NNP=[] #collect all the proper names in NPi
+        for word in leaves_i:
+            start_index_i = leaves_i.index(word)
+            #pos=__pos_by_index__(fs.article,fs.sentence,start_index_i)
+            pos=parent_i[parent_i.leaf_treeposition(start_index_i)[:-1]].node
+            #print word, '\t', pos
+            if pos.startswith('NNP'):
+                i_NNP.append(word)
+        i_NNP=set(i_NNP)
+
+        j_NNP=[] #collect all the proper names in NPj
+        #print "============="
+        for word in leaves_j:
+            start_index_j = leaves_j.index(word)
+            #pos=__pos_by_index__(fs.article,fs.sentence_ref,start_index_j)
+            pos=parent_j[parent_j.leaf_treeposition(start_index_j)[:-1]].node
+            #print word, '\t', pos
+            if pos.startswith('NNP'):
+                j_NNP.append(word)
+        j_NNP=set(j_NNP)
+
+        #if two sets of proper names do not overlap (i.e. mismatch on every word)
+        if len(i_NNP)>0 and len(j_NNP)>0 and len(i_NNP.intersection(j_NNP))<1:
+            result=True
+
+    #print result
+    #print
+    #print
+    return "contains_pn={}".format(result)
 
 
 

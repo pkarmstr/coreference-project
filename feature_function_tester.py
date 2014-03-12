@@ -166,6 +166,9 @@ class FeatureTest(unittest.TestCase):
     def test_same_max_NP(self):
         line1 = "NYT20001111.1247.0093.head.coref 24 3 4 PER photographer 24 5 7 PER Yola_Monakhov photographer Yola_Monakhov yes".rstrip().split()
         feats1 = FeatureRow(*line1)
+        #line2 = "NYT20001019.2136.0319.head.coref 8 0 3 PER George_W._Bush 8 5 6 PER guest George_W._Bush guest yes".rstrip().split()
+        #feats2 = FeatureRow(*line2)
+        #print same_max_NP(feats2)
         self.assertEqual(same_max_NP(feats1).endswith("True"),True)
 
     def test_predicate_nominal(self):
@@ -232,7 +235,7 @@ class FeatureTest(unittest.TestCase):
         feats1 = FeatureRow(*line1)
         self.assertEqual(i_pron_j_not_pron(feats1).endswith("True"),True)
 
-    def meet_all_constraints(self):
+    def test_meet_all_constraints(self):
         line1 = "NYT20001111.1033.0046.head.coref 26 10 11 PER Gore 30 8 9 PER Democrat Gore Democrat yes".rstrip().split()
         feats1 = FeatureRow(*line1)
         line2 = "NYT20001111.1033.0046.head.coref 10 0 2 PER Ralph_Nader 10 3 4 PER who Ralph_Nader who yes".rstrip().split()
@@ -245,6 +248,8 @@ class FeatureTest(unittest.TestCase):
         self.assertEqual(meet_all_constraints(feats2).endswith("True"),True)
         self.assertEqual(meet_all_constraints(feats3).endswith("True"),True)
         self.assertEqual(meet_all_constraints(feats4).endswith("True"),True)
+
+
 
 if __name__ == "__main__":
     unittest.main()
