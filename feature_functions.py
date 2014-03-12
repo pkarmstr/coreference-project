@@ -687,11 +687,9 @@ def rule_resolve(fs):
         found_j = False
         for referent in group:
             if _rule_resolve_helper(referent, fs.sentence, fs.offset_end, fs.offset_end):
-                print referent, fs.token, fs.offset_begin, fs.offset_end, "i"
                 found_i = True
 
             if _rule_resolve_helper(referent, fs.sentence_ref, fs.offset_begin_ref, fs.offset_end_ref):
-                print referent, fs.token_ref, fs.offset_begin_ref, fs.offset_end_ref, "j"
                 found_j = True
 
             if found_i and found_j:
