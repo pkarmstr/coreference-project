@@ -544,7 +544,7 @@ def nominative_case(feats):
         else:
             return "nominative_case={}".format(token)
     else:
-        return "nominative_case={unapplicable}"
+        return "nominative_case=unapplicable"
 
 
 
