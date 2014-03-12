@@ -506,6 +506,36 @@ def _get_inbetween_words__(feats, first_sentence_offset, later_sentence_offset, 
         words_inbetween.extend(until_j)
     return words_inbetween
 
+def subclass(feats):
+    if string_match(feats).endswith("False"):
+        try:
+            result = False
+            i_clean = wn.morphy(feats.i_cleaned.lower(), wn.NOUN)
+            i_synsets = wn.synsets(i_clean)
+            j_clean = wn.morphy(feats.j_cleaned.lower(), wn.NOUN)
+            j_synsets = wn.synsets(j_clean)
+
+            def get_common_hypernym(i_synset,j_synset):
+                i_hypernyms = i_synset.hypernyms()
+                j_hypernyms = j_synset.hypernyms()
+                if len(i_hypernyms) == 0: i_hypernyms = i_synset.instance_hypernyms()[0]
+                if len(j_hypernyms) == 0: j_hypernyms = j_synset.instance_hypernyms()[0]
+                subc = i_synset.common_hypernyms(j_synset)
+                return i_synset in subc or j_synset in subc
+
+            for synset in i_synsets:
+                for syn in j_synsets:
+                    result = get_common_hypernym(synset,syn)
+                    if result: break
+                if result:break
+            return "subclass={}".format(result)
+        except:
+            wn_error
+            return "subclass={}".format(False)
+
+    else:
+        return "subclass={}".format(False)
+
 
 def __get_sem_class__(token):
     token = re.sub(r'[`]','',token)

@@ -261,6 +261,7 @@ class FeatureTest(unittest.TestCase):
         self.assertEqual(__get_sem_class__("anyone")=="PER", True)
         self.assertEqual(__get_sem_class__("America")=="GPE", True)
         self.assertEqual(__get_sem_class__("warship")=="VEH", True)
+        self.assertEqual(__get_sem_class__("Yemen")=="GPE", True)
 
     def test_nominative_case(self):
         line1 = "NYT20001023.2203.0479.head.coref 6 5 8 PER George_W._Bush 26 30 31 PER her George_W._Bush her no".rstrip().split()
@@ -281,6 +282,20 @@ class FeatureTest(unittest.TestCase):
         line1 = "NYT20001020.2144.0366.head.coref 12 24 25 PER she 13 0 1 ORG Associates she Associates no".rstrip().split()
         feats1 = FeatureRow(*line1)
         self.assertEqual(entity_composite(feats1).endswith("PER-ORG"), True)
+
+    def test_subclass(self):
+        line1 = "NYT20001020.2025.0304.head.coref 14 29 30 GPE Yemen 33 1 2 GPE country Yemen country no".rstrip().split()
+        feats1 = FeatureRow(*line1)
+        line2 = "NYT20001106.1705.0187.head.coref 9 17 18 GPE states 9 6 7 GPE Tennessee states Tennessee no".rstrip().split()
+        feats2 = FeatureRow(*line2)
+        line3 = "NYT20001106.1705.0187.head.coref 10 14 15 GPE country 19 2 3 GPE Tennessee country Tennessee no".rstrip().split()
+        feats3 = FeatureRow(*line3)
+        self.assertEqual(subclass(feats1).endswith("True"),True)
+        self.assertEqual(subclass(feats2).endswith("True"),True)
+        self.assertEqual(subclass(feats3).endswith("False"),True)
+
+
+
 
 
 
