@@ -538,6 +538,8 @@ def subclass(feats):
         return "subclass={}".format(False)
 
 
+
+
 def __get_sem_class__(token):
     token = re.sub(r'[`]','',token)
     per_pronouns = ["she", "he", "they", "you", "we",
