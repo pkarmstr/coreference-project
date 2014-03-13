@@ -1130,8 +1130,7 @@ def _coref_helper(i, sentence, offset_begin, offset_end, cleaned):
     cleaned = cleaned.replace("_", " ")
     return i[1] == sentence and \
            i[2]-2 <= offset_begin <= i[2] and \
-           i[3]-3 <= offset_end <= i[3] and \
-           (cleaned in i[0].lower() or i[0].lower() in cleaned)
+           i[3]-3 <= offset_end <= i[3]
 
 def pro_resolve(fs):
     dcoref = COREF_DICTIONARY[fs.article]
