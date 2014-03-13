@@ -100,5 +100,16 @@ POS_DICTIONARY = pos_reader()
 TREES_DICTIONARY = tree_reader()
 PRONOUN_LIST = pronoun_reader()
 NONCONTENT_SET = noncontent_reader()
-#COREF_DICTIONARY = LazyDict("/home/g/grad/pkarmstr/infoextraction/stanford-full-pipeline", dcoref_opener)
-COREF_DICTIONARY = LazyDict("/home/keelan/stanford-full-pipeline", dcoref_opener)
+COREF_DICTIONARY = LazyDict("/home/g/grad/pkarmstr/infoextraction/stanford-full-pipeline", dcoref_opener)
+
+TITLE_SET=set(["chairman", "Chairman", "director", "Director", "president",
+              "President", "manager", "Manager", "executive", "CEO", "Officer",
+              "officer", "consultant","Chief", "CFO", "COO", "CTO", "CMO",
+              "founder", "shareholder", "researcher", "professor",
+              "principal", "Principal","minister","Minister","prime","Prime","chief", "Chief",
+              "prosecutor","Prosecutor","queen","Queen","leader","Leader","secretary","Secretary","ex-Leader",
+              "ex-leader","coach","Coach","composer","Composer","head","Head","governor","Governor","judge",
+              "Judge","democrat","Democrat","republican","Republican","senator","Senator","congressman",
+              "Congressman","congresswoman", "Congresswoman","analyst","Analyst","sen","Sen","Rep","rep","MP",
+              "mp","justice","Justice","co-chairwoman","co-chair","co-chairman","Mr.","mr.","Mr","mr","Ms.","ms.",
+              "Mrs.","mrs.",])

@@ -1,11 +1,12 @@
+from __future__ import division
 from file_reader import TREES_DICTIONARY, POS_DICTIONARY, RAW_DICTIONARY, PRONOUN_LIST, NONCONTENT_SET, COREF_DICTIONARY, FeatureRow
 import re, os, nltk
 from nltk.corpus import names
 from nltk.corpus import wordnet as wn
 from nltk.corpus.reader.wordnet import WordNetError as wn_error
 from nltk.tree import ParentedTree
-import difflib
-
+from nltk.corpus import wordnet as wn
+from math import ceil
 #SEM_CLASSES = {wn.synset('person.n.01'):"PER", wn.synset('location.n.01'):"LOC", wn.synset('organization.n.01'):"ORG",
 #               wn.synset('date.n.01'):"DATE", wn.synset('time_unit.n.01'):"TIME", wn.synset('money.n.01'):"MONEY",
 #               wn.synset('percent.n.01'):"PERCENT", wn.synset('object.n.01'):"OBJECT"}
@@ -251,6 +252,24 @@ def __get_parent_tree__(unclean_token, t):
 
     return parent_tree
 
+def parent_test(fs):
+    """
+    Used for testing the ___get_parent_tree__ function. DNU otherwise.
+    """
+    i_t=TREES_DICTIONARY[fs.article+'.raw'][int(fs.sentence)]
+    j_t=TREES_DICTIONARY[fs.article+'.raw'][int(fs.sentence_ref)]
+    parent_i=__get_parent_tree__(fs.token,i_t)
+    parent_j=__get_parent_tree__(fs.token_ref,j_t)
+    print "LEFT SIDE:"
+    print fs.token
+    print parent_i.__repr__()
+    print
+    print "RIGHT SIDE:"
+    print fs.token_ref
+    print parent_j.__repr__()
+    print
+    print
+    return "parent_test={}".format('Blah')
 
 def __get_max_projection__(bigger_tree,target_tree):
     """this actually only returns the parent of the target tree.
@@ -441,10 +460,8 @@ def meet_all_constraints(feats):
     entity_agree = animacy_agreement(feats).endswith("True")
     compatible = gender_agree and number_agree and \
                  compatible_syntx and animacy_agree and entity_agree
-
     return "meet_all_constraints={}".format(compatible)
-
-
+    return "meet_all_constraints={}".format(compatible)
 def closest_comp(feats):
     closest = True
     
@@ -580,9 +597,6 @@ def nominative_case(feats):
     else:
         return "nominative_case=unapplicable"
 
-
-
-
 ################
 # Anya's stuff #
 ################
@@ -654,6 +668,13 @@ def dist(fs):
     """number of sentences between the markables"""
     distance=int(fs.sentence_ref) - int(fs.sentence)
     return "dist={}".format(str(distance))
+
+def dist_ten(fs):
+    """
+    True if the number of sentences b/w the markables is less than or equal to ten, False otherwise.
+    """
+    distance=int(fs.sentence_ref) - int(fs.sentence)
+    return "dist_ten={}".format(distance<10)
 
 def i_pronoun(fs):
     """the first markable is a pronoun (includes reflexives)"""
@@ -788,6 +809,28 @@ def modifier(fs):
 
     return "modifier={}".format(result)
 
+def pro_str(fs):
+    """
+    C if both NPs are pronominal and are the same string.
+    """
+    result=False
+
+    i_pos=__get_pos__(fs.article,fs.sentence,fs.offset_begin,fs.offset_end)
+    j_pos=__get_pos__(fs.article,fs.sentence_ref,fs.offset_begin_ref,fs.offset_end_ref)
+
+    return "pro_str={}".format(i_pos.startswith('PRP') and j_pos.startswith('PRP') and fs.i_cleaned==fs.j_cleaned)
+
+def pn_str(fs):
+    """
+    C if both NPs are proper names and are the same string.
+    """
+    result=False
+
+    i_pos=__get_pos__(fs.article,fs.sentence,fs.offset_begin,fs.offset_end)
+    j_pos=__get_pos__(fs.article,fs.sentence_ref,fs.offset_begin_ref,fs.offset_end_ref)
+
+    return "pro_str={}".format(i_pos.startswith('NNP') and j_pos.startswith('NNP') and fs.i_cleaned==fs.j_cleaned)
+
 def pn_substr(fs):
     """
     C if both NPs are proper names and one NP is a proper substring (w.r.t. content words
@@ -804,6 +847,17 @@ def pn_substr(fs):
 
     return "pn_substr={}".format(result)
 
+def words_str(fs):
+    """
+    C if both NPs are non-pronominal and are the same string.
+    """
+    result=False
+
+    i_pos=__get_pos__(fs.article,fs.sentence,fs.offset_begin,fs.offset_end)
+    j_pos=__get_pos__(fs.article,fs.sentence_ref,fs.offset_begin_ref,fs.offset_end_ref)
+
+    return "words_str={}".format(not i_pos.startswith('PRP') and not j_pos.startswith('PRP') and fs.i_cleaned==fs.j_cleaned)
+
 def words_substr(fs):
     """
     C if both NPs are non-pronominal and one NP is a proper substring (w.r.t. content words
@@ -818,11 +872,16 @@ def words_substr(fs):
         if word_overlap(fs).endswith('True'):
             result=True
 
-    print fs.token, '\t', fs.token_ref
-    print result
-    print
-
     return "words_substr={}".format(result)
+
+def soon_str_nonpro(fs):
+    """
+    C if both NPs are non-pronominal and the string of NP matches that of NP; else I.
+    """
+    i_pos=__get_pos__(fs.article,fs.sentence,fs.offset_begin,fs.offset_end)
+    j_pos=__get_pos__(fs.article,fs.sentence_ref,fs.offset_begin_ref,fs.offset_end_ref)
+
+    return "soon_str_nonpro={}".format(not i_pos.startswith('PRP') and not j_pos.startswith('PRP') and string_match(fs).endswith('True'))
 
 def both_definites(fs):
     """
@@ -837,13 +896,22 @@ def both_definites(fs):
 
     return "both_definites={}".format(i_def and j_def)
 
+def definite_1(fs):
+    """
+    Y if NP1 starts with the; else N.
+    """
+
+    parent_i = __get_parent_tree__(fs.token,TREES_DICTIONARY[fs.article+".raw"][int(fs.sentence)])
+
+    i_def=parent_i.node=='NP' and parent_i.leaves()[0].lower()=='the'
+
+    return "definite_1={}".format(i_def)
+
 def both_embedded(fs):
     """
     C if both NPs are prenominal modifiers.
     Approach:
-        - find the token in its parent tree
-        - get the list of tokens that occur after it in that tree
-        - if for both i and j that list contains a noun, return True
+        - look at 2 tokens ahead of i and j and see if either of them are nouns (the tree approach didn't work)
     """
     i_embedded=False
     j_embedded=False
@@ -871,11 +939,66 @@ def both_embedded(fs):
 
     return "both_embedded={}".format(i_embedded and j_embedded)
 
+def embedded_1(fs):
+    """
+    C if the first NP is a prenominal modifier.
+    Approach:
+        - look at 2 tokens ahead of i and see if either of them are nouns (the tree approach didn't work)
+    """
+    i_embedded=False
+
+    sent_i=POS_DICTIONARY[fs.article +".raw"][int(fs.sentence)]
+
+    #see if there is a noun within 2 words after i
+    p=int(fs.offset_end)
+
+    while p<int(fs.offset_end)+2 and p<len(sent_i) and i_embedded==False:
+
+        if sent_i[p][-1].startswith('NN'):
+            i_embedded=True
+        p+=1
+
+    return "embedded_1={}".format(i_embedded)
+
+def embedded_2(fs):
+    """
+    C if the second NP is a prenominal modifier.
+    Approach:
+        - look at 2 tokens ahead of j and see if either of them are nouns (the tree approach didn't work)
+    """
+    j_embedded=False
+
+    sent_j=POS_DICTIONARY[fs.article +".raw"][int(fs.sentence_ref)]
+
+    #see if there is a noun within 2 words after j
+    p=int(fs.offset_end_ref)
+
+    while p<int(fs.offset_end_ref)+2 and p<len(sent_j) and j_embedded==False:
+
+        if sent_j[p][-1].startswith('NN'):
+            j_embedded=True
+        p+=1
+
+    return "embedded_2={}".format(j_embedded)
+
 def both_pronouns(fs):
     """C if both markables are pronouns"""
     i_pos=__get_pos__(fs.article,fs.sentence,fs.offset_begin,fs.offset_end)
     j_pos=__get_pos__(fs.article,fs.sentence_ref,fs.offset_begin_ref,fs.offset_end_ref)
     return "both_pronouns={}".format(i_pos.startswith('PRP') and j_pos.startswith('PRP'))
+
+def __pos_by_index__(fname,sent_num,start_index):
+    """from Anya, just changed the +.raw part. WORKS"""
+    fname += ".raw"
+    sent_num=int(sent_num)
+    start_index=int(start_index)
+    sent=POS_DICTIONARY[fname][sent_num]
+    if start_index < len(sent):
+        word=sent[start_index]
+        pos=word[1]
+    else:
+        pos="none"
+    return pos
 
 def contains_pn(fs):
     """
@@ -925,6 +1048,61 @@ def contains_pn(fs):
     #print
     #print
     return "contains_pn={}".format(result)
+
+def proper_noun(fs):
+    """
+    I if both NPs are proper names, but mismatch on every word; else C.
+    """
+    i_pos=__get_pos__(fs.article,fs.sentence,fs.offset_begin,fs.offset_end)
+    j_pos=__get_pos__(fs.article,fs.sentence_ref,fs.offset_begin_ref,fs.offset_end_ref)
+    return "proper_noun={}".format(i_pos.startswith('NNP') and j_pos.startswith('NNP') and string_match(fs).endswith('False'))
+
+def title(fs):
+    """
+    I if one or both of the NPs is a title; else C.
+    """
+    return "title={}".format(fs.i_cleaned in TITLE_SET or fs.j_cleaned in TITLE_SET)
+
+def title_per(fs):
+    """
+    True if one is a title and the other is a person.
+    """
+    result=(fs.i_cleaned in TITLE_SET and fs.entity_type_ref=='PER') or (fs.j_cleaned in TITLE_SET and fs.entity_type=='PER')
+    return "title_per={}".format(result)
+
+def wndist(fs):
+    """
+    Distance between NP1 and NP2 in WordNet (using the first sense only)
+    """
+
+    wndist=-100000
+
+    i_pos=__get_pos__(fs.article,fs.sentence,fs.offset_begin,fs.offset_end)
+    j_pos=__get_pos__(fs.article,fs.sentence_ref,fs.offset_begin_ref,fs.offset_end_ref)
+
+    #print "Orig:", fs.token, '\t', fs.token_ref
+
+    if i_pos.startswith('NN') and j_pos.startswith('NN') and not i_pos.endswith('P') and not j_pos.endswith('P'):
+        # considering only common nouns
+        lemmatizer = nltk.WordNetLemmatizer()
+        i=lemmatizer.lemmatize(fs.i_cleaned, pos='n')
+        j=lemmatizer.lemmatize(fs.j_cleaned, pos='n')
+        synsets_i=wn.synsets(i)
+        synsets_j=wn.synsets(j)
+        if len(synsets_i)>0 and len(synsets_j)>0:
+            wn_sense1_i=synsets_i[0]
+            wn_sense1_j=synsets_j[0]
+            wn_pos_i=str(wn_sense1_i).split('.')[1]
+            wn_pos_j=str(wn_sense1_j).split('.')[1]
+            if wn_pos_i==wn_pos_j:
+                wndist=wn_sense1_i.lch_similarity(wn_sense1_j)
+                wndist=(ceil(wndist * 100) / 100.0)
+                #print "Lemmatized:", i, '\t', j, '\t', str(wndist)
+
+    #print
+    #print
+
+    return "wndist={}".format(wndist)
 
         
 ##################
