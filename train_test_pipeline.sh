@@ -1,4 +1,6 @@
 #!/bin/sh
+PYTHONPATH="$PYTHONPATH:/home/g/grad/pkarmstr/python27/lib/python2.7/site-packages"
+export PYTHONPATH
 EXPERIMENT_DIR="$1"
 TYPE="$2"
 PYTHON="/home/g/grad/pkarmstr/python27/bin/python2.7"
