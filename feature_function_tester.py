@@ -290,9 +290,12 @@ class FeatureTest(unittest.TestCase):
         feats2 = FeatureRow(*line2)
         line3 = "NYT20001106.1705.0187.head.coref 10 14 15 GPE country 19 2 3 GPE Tennessee country Tennessee no".rstrip().split()
         feats3 = FeatureRow(*line3)
+        line4 = "NYT20001023.2203.0479.head.coref 15 30 31 GPE Massachusetts 15 40 41 GPE state Massachusetts state yes".rstrip().split()
+        feats4 = FeatureRow(*line4)
         self.assertEqual(subclass(feats1).endswith("True"),True)
         self.assertEqual(subclass(feats2).endswith("True"),True)
         self.assertEqual(subclass(feats3).endswith("False"),True)
+        self.assertTrue(subclass(feats4).endswith("True"))
 
 
 

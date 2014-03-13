@@ -514,14 +514,15 @@ def subclass(feats):
             i_synsets = wn.synsets(i_clean)
             j_clean = wn.morphy(feats.j_cleaned.lower(), wn.NOUN)
             j_synsets = wn.synsets(j_clean)
-
             def get_common_hypernym(i_synset,j_synset):
                 i_hypernyms = i_synset.hypernyms()
                 j_hypernyms = j_synset.hypernyms()
-                if len(i_hypernyms) == 0: i_hypernyms = i_synset.instance_hypernyms()[0]
-                if len(j_hypernyms) == 0: j_hypernyms = j_synset.instance_hypernyms()[0]
+                if len(i_hypernyms) == 0:
+                    i_synset = i_synset.instance_hypernyms()[0]
+                if len(j_hypernyms) == 0:
+                    j_synset = j_synset.instance_hypernyms()[0]
                 subc = i_synset.common_hypernyms(j_synset)
-                return i_synset in subc or j_synset in subc
+                return (i_synset in subc) or (j_synset in subc)
 
             for synset in i_synsets:
                 for syn in j_synsets:
