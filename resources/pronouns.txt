@@ -23,3 +23,6 @@ our
 ours
 their
 theirs
+who
+whom
+which
