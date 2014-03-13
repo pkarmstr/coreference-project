@@ -701,4 +701,4 @@ def _rule_resolve_helper(i, sentence, offset_begin, offset_end):
     """heuristically, i[1] and i[2] will have a later index, especially i[2]"""
     return i[1] == sentence and \
            i[2]-2 <= offset_begin <= i[2] and \
-           i[3]-5 <= offset_end <= i[3]
+           i[3]-3 <= offset_end <= i[3]
