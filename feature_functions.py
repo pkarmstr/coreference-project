@@ -686,12 +686,12 @@ def rule_resolve(fs):
         found_i = False
         found_j = False
         for referent in group:
-            if _rule_resolve_helper(referent, fs.sentence, fs.offset_end, fs.offset_end):
-                print referent, fs.token, fs.offset_begin, fs.offset_end, "i"
+            if _rule_resolve_helper(referent, fs.sentence, fs.offset_begin, fs.offset_end):
+                #print referent, fs.token, fs.offset_begin, fs.offset_end, "i"
                 found_i = True
 
             if _rule_resolve_helper(referent, fs.sentence_ref, fs.offset_begin_ref, fs.offset_end_ref):
-                print referent, fs.token_ref, fs.offset_begin_ref, fs.offset_end_ref, "j"
+                #print referent, fs.token_ref, fs.offset_begin_ref, fs.offset_end_ref, "j"
                 found_j = True
 
             if found_i and found_j:
@@ -700,6 +700,7 @@ def rule_resolve(fs):
     return "rule_resolve=False"
 
 def _rule_resolve_helper(i, sentence, offset_begin, offset_end):
+    """heuristically, i[1] and i[2] will have a later index, especially i[2]"""
     return i[1] == sentence and \
-           i[2]-2 <= offset_begin <= i[2]+2 and \
-           i[3]-2 <= offset_end <= i[3]+2
+           i[2]-2 <= offset_begin <= i[2] and \
+           i[3]-5 <= offset_end <= i[3]
