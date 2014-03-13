@@ -1,5 +1,5 @@
 from __future__ import division
-from file_reader import TREES_DICTIONARY, POS_DICTIONARY, RAW_DICTIONARY, PRONOUN_LIST, NONCONTENT_SET, COREF_DICTIONARY, FeatureRow
+from file_reader import TREES_DICTIONARY, POS_DICTIONARY, RAW_DICTIONARY, PRONOUN_LIST, NONCONTENT_SET, COREF_DICTIONARY, FeatureRow, TITLE_SET
 import re, os, nltk
 from nltk.corpus import names
 from nltk.corpus import wordnet as wn
@@ -1109,7 +1109,7 @@ def wndist(fs):
 # keelan's stuff #
 ##################
     
-    def rule_resolve(fs):
+def rule_resolve(fs):
     dcoref = COREF_DICTIONARY[fs.article]
     for group in dcoref:
         found_i = False
