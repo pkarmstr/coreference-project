@@ -686,10 +686,10 @@ def rule_resolve(fs):
         found_i = False
         found_j = False
         for referent in group:
-            if _rule_resolve_helper(referent, fs.sentence, fs.offset_begin, fs.offset_end):
+            if _coref_helper(referent, fs.sentence, fs.offset_begin, fs.offset_end, fs.i_cleaned):
                 found_i = True
 
-            if _rule_resolve_helper(referent, fs.sentence_ref, fs.offset_begin_ref, fs.offset_end_ref):
+            if _coref_helper(referent, fs.sentence_ref, fs.offset_begin_ref, fs.offset_end_ref, fs.j_cleaned):
                 found_j = True
 
             if found_i and found_j:
@@ -697,8 +697,38 @@ def rule_resolve(fs):
 
     return "rule_resolve=False"
 
-def _rule_resolve_helper(i, sentence, offset_begin, offset_end):
-    """heuristically, i[1] and i[2] will have a later index, especially i[2]"""
+def _coref_helper(i, sentence, offset_begin, offset_end, cleaned):
+    """heuristically, i[2] and i[3] will have a later index, especially i[3]"""
+    cleaned = cleaned.replace("_", " ")
     return i[1] == sentence and \
            i[2]-2 <= offset_begin <= i[2] and \
-           i[3]-3 <= offset_end <= i[3]
+           i[3]-3 <= offset_end <= i[3] and \
+           (cleaned in i[0].lower() or i[0].lower() in cleaned)
+
+def pro_resolve(fs):
+    dcoref = COREF_DICTIONARY[fs.article]
+    i_pos_tag = __get_pos__(fs.article, fs.sentence, fs.offset_begin, fs.offset_end)
+    j_pos_tag = __get_pos__(fs.article, fs.sentence_ref, fs.offset_begin_ref, fs.offset_end_ref)
+    if not ("PRP" in i_pos_tag or "PRP" in j_pos_tag):
+        return "pro_resolve=False"
+    for group in dcoref:
+        found_i = False
+        found_j = False
+        for referent in group:
+            if "PRP" in i_pos_tag:
+                if fs.sentence == referent[1] and fs.i_cleaned in referent[0]:
+                    found_i = True
+            elif _coref_helper(referent, fs.sentence, fs.offset_begin, fs.offset_end, fs.i_cleaned):
+                found_i = True
+
+            if "PRP" in j_pos_tag:
+                if fs.sentence_ref == referent[1] and fs.j_cleaned in referent[0]:
+                    found_j = True
+            elif _coref_helper(referent, fs.sentence_ref, fs.offset_begin_ref, fs.offset_end_ref, fs.j_cleaned):
+                found_j = True
+
+            if found_i and found_j:
+                return "pro_resolve=True"
+
+    return "pro_resolve=False"
+

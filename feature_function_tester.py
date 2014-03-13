@@ -184,11 +184,17 @@ class FeatureTest(unittest.TestCase):
         self.assertEqual(word_overlap(fs1).endswith("False"),True)
         self.assertEqual(word_overlap(fs2).endswith("False"),True)
 
-    def test_rule_resole(self):
-        fs1 = FeatureRow("APW20001001.2021.0521.head.coref", 3, 16, 18, "PER", "Bashar_Assad", 4, 0, 1, "PER", "Assad", "", "", "yes")
+    def test_rule_resolve(self):
+        fs1 = FeatureRow("APW20001001.2021.0521.head.coref", 3, 16, 18, "PER", "Bashar_Assad", 4, 0, 1, "PER", "Assad", "bashar_assad", "assad", "yes")
         self.assertTrue(rule_resolve(fs1).endswith("True"))
-        fs2 = FeatureRow("APW20001001.2021.0521.head.coref", 3, 36, 37, "", "Palestinian", 4, 0, 1, "", "Assad", "", "", "no")
-        #self.assertFalse(rule_resolve(fs2).endswith("True"))
+        fs2 = FeatureRow("APW20001001.2021.0521.head.coref", 3, 36, 37, "", "Palestinian", 4, 0, 1, "", "Assad", "palestinian", "assad", "no")
+        self.assertFalse(rule_resolve(fs2).endswith("True"))
+
+    def test_pro_resolve(self):
+        fs1 = FeatureRow("APW20001001.2021.0521.head.coref", 21, 0, 1, "PER", "Moussa", 22, 2, 3, "PER", "he", "moussa", "he", "yes")
+        self.assertTrue(pro_resolve(fs1).endswith("True"))
+        fs2 = FeatureRow("APW20001001.2021.0521.head.coref", 22, 17, 18, "GPE", "Baghdad", 22, 2, 3, "PER", "he", "baghdad", "he", "no")
+        self.assertTrue(pro_resolve(fs2).endswith("False"))
 
 if __name__ == "__main__":
     unittest.main()
