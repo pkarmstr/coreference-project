@@ -813,12 +813,8 @@ def pro_str(fs):
     """
     C if both NPs are pronominal and are the same string.
     """
-    result=False
 
-    i_pos=__get_pos__(fs.article,fs.sentence,fs.offset_begin,fs.offset_end)
-    j_pos=__get_pos__(fs.article,fs.sentence_ref,fs.offset_begin_ref,fs.offset_end_ref)
-
-    return "pro_str={}".format(i_pos.startswith('PRP') and j_pos.startswith('PRP') and fs.i_cleaned==fs.j_cleaned)
+    return "pro_str={}".format(fs.i_cleaned in PRONOUN_LIST and fs.j_cleaned in PRONOUN_LIST and fs.i_cleaned==fs.j_cleaned)
 
 def pn_str(fs):
     """
