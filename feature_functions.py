@@ -109,7 +109,6 @@ def gender_agreement(feats):
     else:
         agreement = i_gender == j_gender
 
-    print feats.token,'\t',feats.token_ref,'\t',agreement
     return "gender_agreement={}".format(agreement)
 
 def __determine_gender__(article, sentence, token, start_index, end_index, entity_type):
