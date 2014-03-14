@@ -222,8 +222,6 @@ def __get_parent_tree__(unclean_token, t):
     words = unclean_token.split('_')
     leaf_indices=[]
     for word in words:
-        word=re.sub(r'O\'|d\'|;T','',re.sub(r'\'s$','',re.sub(r'[^\w\s.]+$','',re.sub(r'^[^\w\s-]+','',word))))
-        word=re.sub(r'Bond/|/ABC','',word)
         if word=='':
             word='&'
         elif word=='CBS' and word not in t.leaves():
@@ -243,7 +241,7 @@ def __get_parent_tree__(unclean_token, t):
         position_tuple=t.leaf_treeposition(start)
 
     #if a phrase spans an entire NP, we want to just return that NP instead of going one level up
-    if not isinstance(t[position_tuple],str) and t[position_tuple].node.endswith('P') and \
+    if not isinstance(t[position_tuple],unicode) and t[position_tuple].node.endswith('P') and \
                     t[position_tuple].node!='PRP' and t[position_tuple].node!='NNP':
         parent_tree=t[position_tuple]
 
@@ -649,7 +647,7 @@ def def_np(fs):
     if later_mention=='i':
         sent_tree=TREES_DICTIONARY[fs.article+".raw"][int(fs.sentence)]
         parent_tree=__get_parent_tree__(fs.token, sent_tree)
-    elif later_mention=='j':
+    else:
         sent_tree=TREES_DICTIONARY[fs.article+".raw"][int(fs.sentence_ref)]
         parent_tree=__get_parent_tree__(fs.token_ref, sent_tree)
 

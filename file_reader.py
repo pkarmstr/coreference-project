@@ -121,7 +121,7 @@ FeatureRow = namedtuple("FeatureRow", ["article", "sentence", "offset_begin",
 ###########################
 # `final` data structures #
 ###########################
-basedir = "/home/g/grad/pkarmstr/infoextraction/stanford-full-pipeline"
+basedir = "/home/keelan/stanford-full-pipeline"
 
 #RAW_DICTIONARY = raw_reader()
 #POS_DICTIONARY = pos_reader()
