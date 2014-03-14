@@ -89,28 +89,43 @@ def both_proper_name(feats):
 
 
 def gender_agreement(feats):
-    """WORKS"""
+    """
+    WORKS
+    AK: added an assumption that if i and j are non-overlapping proper names, we return False
+    (this prevents cases like Fred Armisen and Al Gore == True.)
+    """
+    #pos_i = __get_pos__(feats.article,feats.sentence,feats.offset_begin,feats.offset_end)
+    #pos_j = __get_pos__(feats.article,feats.sentence_ref,feats.offset_begin_ref,feats.offset_end_ref)
+
     i_gender = __determine_gender__(feats.article, feats.sentence, feats.i_cleaned,
                                 feats.offset_begin, feats.offset_end, feats.entity_type)
     j_gender=__determine_gender__(feats.article, feats.sentence_ref, feats.j_cleaned,
                               feats.offset_begin_ref,feats.offset_end_ref, feats.entity_type_ref)
+
     if i_gender == "unknown" or j_gender == "unknown":
-        agreement = "unknown"
+        agreement = False
+    elif feats.i_cleaned.split('_')[0].title() in names.words() and feats.j_cleaned.split('_')[0].title() in names.words() and string_match(feats).endswith('False'):
+        agreement=False
     else:
         agreement = i_gender == j_gender
+
+    print feats.token,'\t',feats.token_ref,'\t',agreement
     return "gender_agreement={}".format(agreement)
 
 def __determine_gender__(article, sentence, token, start_index, end_index, entity_type):
     """WORKS"""
     if entity_type == "PER":
         if token in PRONOUN_LIST:
-            if token in ["he","his"]:
+            if token in ["he","his","him"]:
                 return "male"
             elif token in ["she","her"]:
                 return "female"
-        elif token.startswith("Mr.") or token.split("_")[0] in names.words("male.txt"):
-            return "male"
-        elif token.startswith("Mrs.") or token.split("_")[0] in names.words("female.txt"):
+        elif token.startswith("Mr.") or token=="Mr" or \
+                token.startswith("mr.") or token=="mr" or \
+                        token.split("_")[0].title() in names.words("male.txt") or token in TITLE_SET or token.endswith('man'):
+            return "male"       #being very sexist with the title assumption...
+        elif token.startswith("Mrs") or token.startswith("mrs") or \
+                        token.split("_")[0].title() in names.words("female.txt") or token.endswith('woman'):
             return "female"
     return "unknown"
 

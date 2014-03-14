@@ -110,6 +110,6 @@ TITLE_SET=set(["chairman", "Chairman", "director", "Director", "president",
               "prosecutor","Prosecutor","queen","Queen","leader","Leader","secretary","Secretary","ex-Leader",
               "ex-leader","coach","Coach","composer","Composer","head","Head","governor","Governor","judge",
               "Judge","democrat","Democrat","republican","Republican","senator","Senator","congressman",
-              "Congressman","congresswoman", "Congresswoman","analyst","Analyst","sen","Sen","Rep","rep","MP",
+              "Congressman","congresswoman", "Congresswoman","analyst","Analyst","sen","Sen","Sen.","sen.","Rep","rep","MP",
               "mp","justice","Justice","co-chairwoman","co-chair","co-chairman","Mr.","mr.","Mr","mr","Ms.","ms.",
-              "Mrs.","mrs.",])
+              "Mrs.","mrs.","agent"])
